@@ -91,7 +91,6 @@ const updateGenSelect = () => {
 };
 
 // === GENERÁTOR ===
-// === GENERÁTOR ===
 window.generateData = () => {
     const code = document.getElementById('genSelect').value;
     const amountStr = document.getElementById('genAmount').value;
@@ -132,9 +131,18 @@ window.generateData = () => {
     document.getElementById('q1-text').innerHTML = `<strong style="color:#000">${qr1Text}</strong>`;
     document.getElementById('q2-text').innerHTML = `<strong style="color:#000">${formatIC(cleanIC)}${paddedAmount}${r10}</strong>`;
 
+    // === GOOGLE ANALYTICS ESEMÉNY BEKÜLDÉSE ===
+    if (typeof window.gtag === 'function') {
+        const userId = localStorage.getItem('anon_user_id') || 'ismeretlen';
+        window.gtag('event', 'generate_ic', {
+            'ic_type': code,          // A kiválasztott IC kódja
+            'amount': amount,         // A beírt mennyiség
+            'client_id': userId       // Az eszköz egyedi azonosítója
+        });
+    }
+
     document.getElementById('qrFullscreen').classList.remove('hidden');
 };
-
 
 window.clearGenerator = () => {
     haptic('light');
