@@ -1,3 +1,9 @@
+if (!localStorage.getItem('anon_user_id')) {
+    localStorage.setItem('anon_user_id', 'user_' + Math.random().toString(36).substr(2, 9));
+}
+const userId = localStorage.getItem('anon_user_id');
+
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
