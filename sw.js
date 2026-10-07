@@ -1,4 +1,4 @@
-const CACHE_NAME = 'addic-v5';
+const CACHE_NAME = 'addic-v6';
 const ASSETS = [
   './',
   './index.html',
