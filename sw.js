@@ -1,4 +1,4 @@
-const CACHE_NAME = 'addic-v6';
+const CACHE_NAME = 'addic-v7';
 const ASSETS = [
   './',
   './index.html',
@@ -10,14 +10,14 @@ const ASSETS = [
   'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'
 ];
 
-// Telepítéskor elmentjük a fájlokat
 self.addEventListener('install', (e) => {
+  // Ez a sor kényszeríti az azonnali frissítést, megkerülve a beragadt cache-t
+  self.skipWaiting(); 
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
 });
 
-// Aktív állapotban töröljük a régi gyorsítótárat
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
@@ -26,14 +26,12 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Hálózati kérések elcsípése: Előbb a gyorsítótár, utána a hálózat
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((res) => res || fetch(e.request))
   );
 });
 
-// === ÚJ: Engedélyezzük az azonnali frissítést a gombnyomásra ===
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
