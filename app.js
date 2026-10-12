@@ -158,56 +158,77 @@ window.closeQr = () => {
     document.getElementById('genSelect').value = '';
 };
 
-// === ÚJ: STATISZTIKA BETÖLTÉSE ===
+// === STATISZTIKA BETÖLTÉSE (BŐVÍTETT) ===
 window.loadStats = async () => {
     try {
         haptic('light');
-        const statTodayCount = document.getElementById('statTodayCount');
-        const statTopIc = document.getElementById('statTopIc');
         
-        if (statTodayCount) statTodayCount.innerText = "Frissítés...";
-        if (statTopIc) statTopIc.innerText = "Betöltés...";
-
-        // Mai nap kezdete
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayStr = today.toISOString();
+        // 1. Dátumok meghatározása
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
         
-        // Letöltjük az összes logot (ezt később lehet optimalizálni query-vel)
         const querySnapshot = await getDocs(collection(db, 'logs'));
         
-        let todayCount = 0;
-        const icCounts = {};
+        // Változók a számoláshoz
+        let dayCount = 0, monthCount = 0, allCount = 0;
+        let monthAmount = 0;
+        const dayIcs = {}, monthIcs = {};
+        const uniqueUsers = new Set();
 
-        // Végigmegyünk az adatokon és szűrjük a maiakat
+        // 2. Adatok szétválogatása
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            if (data.timestamp && data.timestamp >= todayStr) {
-                todayCount++;
-                icCounts[data.icCode] = (icCounts[data.icCode] || 0) + 1;
+            if (!data.timestamp) return;
+
+            // Összesített adatok
+            allCount++;
+            if (data.userId) uniqueUsers.add(data.userId);
+
+            // Havi adatok
+            if (data.timestamp >= firstDayOfMonth) {
+                monthCount++;
+                monthAmount += (data.amount || 0);
+                monthIcs[data.icCode] = (monthIcs[data.icCode] || 0) + 1;
+            }
+
+            // Mai adatok
+            if (data.timestamp >= today) {
+                dayCount++;
+                dayIcs[data.icCode] = (dayIcs[data.icCode] || 0) + 1;
             }
         });
 
-        // Kikeressük a legnagyobbat
-        let topIc = "Nincs még adat mára";
-        let maxCount = 0;
-        for (const [ic, count] of Object.entries(icCounts)) {
-            if (count > maxCount) {
-                maxCount = count;
-                topIc = `${formatIC(ic)} (${count}x)`;
+        // Segédfüggvény a legnépszerűbb megtalálásához
+        const getTopIc = (countsObj) => {
+            let topIc = "Nincs adat";
+            let maxCount = 0;
+            for (const [ic, count] of Object.entries(countsObj)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    topIc = `${formatIC(ic)} (${count}x)`;
+                }
             }
-        }
+            return topIc;
+        };
 
-        // Képernyő frissítése
-        if (statTodayCount) statTodayCount.innerText = todayCount;
-        if (statTopIc) statTopIc.innerText = topIc;
+        // 3. Adatok kiírása a felületre
+        document.getElementById('statDayCount').innerText = dayCount;
+        document.getElementById('statDayTop').innerText = getTopIc(dayIcs);
+        
+        document.getElementById('statMonthCount').innerText = monthCount;
+        document.getElementById('statMonthAmount').innerText = monthAmount.toLocaleString('hu-HU') + ' db';
+        document.getElementById('statMonthTop').innerText = getTopIc(monthIcs);
+        
+        document.getElementById('statAllCount').innerText = allCount;
+        document.getElementById('statAllUsers').innerText = uniqueUsers.size;
 
     } catch (error) {
         console.error("Hiba a statisztika betöltésekor", error);
-        const statTopIc = document.getElementById('statTopIc');
-        if (statTopIc) statTopIc.innerText = "Hiba történt a betöltéskor.";
+        showToast("Hiba történt az adatok letöltésekor!");
     }
 };
+
 
 // === ADMIN ===
 const renderAdminList = () => {
