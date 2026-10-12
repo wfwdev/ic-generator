@@ -3,9 +3,9 @@ if (!localStorage.getItem('anon_user_id')) {
 }
 const userId = localStorage.getItem('anon_user_id');
 
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+// ÚJ: A getDocs hozzáadva az importokhoz a statisztika lekéréséhez
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, enableIndexedDbPersistence, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAsthGIMXvc-pFXfc63tGEclGg5V6qCT0s",
@@ -20,7 +20,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 enableIndexedDbPersistence(db).catch(() => console.warn("Offline mód korlátozott"));
 
-// === HAPTIKUS VISSZAJELZÉS (Biztonságos hívás) ===
+// === HAPTIKUS VISSZAJELZÉS ===
 const haptic = (type = 'light') => {
     if (!("vibrate" in navigator)) return;
     try {
@@ -30,7 +30,7 @@ const haptic = (type = 'light') => {
     } catch (e) {}
 };
 
-// === IC FORMÁZÓ (Hibajavított, nem fagy le üres adatnál) ===
+// === IC FORMÁZÓ ===
 const formatIC = (raw) => {
     if (!raw) return ''; 
     const c = String(raw).replace(/[^A-Z0-9]/gi, '').toUpperCase();
@@ -68,11 +68,16 @@ onSnapshot(collection(db, 'ic_numbers'), (snap) => {
 // === UI KEZELÉS ===
 window.showTab = (name) => {
     haptic('light');
-    ['generator', 'admin', 'info'].forEach(t => {
+    ['generator', 'admin', 'stat', 'info'].forEach(t => { 
         const el = document.getElementById(`tab-${t}`);
         if(el) el.classList.toggle('hidden', t !== name);
     });
     document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.toggle('active', b.getAttribute('onclick').includes(name)));
+    
+    // ÚJ: Ha a statisztika fülre váltunk, betöltjük az adatokat
+    if (name === 'stat') {
+        window.loadStats();
+    }
 };
 
 window.switchType = (type) => {
@@ -91,7 +96,7 @@ const updateGenSelect = () => {
 };
 
 // === GENERÁTOR ===
-window.generateData = () => {
+window.generateData = async () => {
     const code = document.getElementById('genSelect').value;
     const amountStr = document.getElementById('genAmount').value;
     const amount = parseInt(amountStr);
@@ -104,10 +109,8 @@ window.generateData = () => {
     const cleanIC = code.replace(/[^a-zA-Z0-9]/g, '');
     const paddedAmount = amountStr.padStart(7, '0');
     
-    // A 2. QR kód random kiegészítése maradt
     const r10 = Math.floor(Math.random() * 9e9 + 1e9).toString();
 
-    // === ÚJ LOGIKA AZ 1. QR KÓDHOZ ===
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -116,29 +119,27 @@ window.generateData = () => {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
     
-    // Formátum felépítése (Pl: a2c0131370200@20260427@092355)
-    // cleanIC.toLowerCase() a kisbetűs formátumhoz
     const qr1Text = `${cleanIC.toLowerCase()}@${year}${month}${day}@${hours}${minutes}${seconds}`;
 
     document.getElementById('q1-large').innerHTML = '';
     document.getElementById('q2-large').innerHTML = '';
 
-    // QR kódok legenerálása
     new QRCode(document.getElementById("q1-large"), { text: qr1Text, width: 250, height: 250, correctLevel: QRCode.CorrectLevel.H });
     new QRCode(document.getElementById("q2-large"), { text: `${cleanIC}${paddedAmount}${r10}`, width: 250, height: 250, correctLevel: QRCode.CorrectLevel.H });
     
-    // Szövegek beállítása a QR kódok alá
     document.getElementById('q1-text').innerHTML = `<strong style="color:#000">${qr1Text}</strong>`;
     document.getElementById('q2-text').innerHTML = `<strong style="color:#000">${formatIC(cleanIC)}${paddedAmount}${r10}</strong>`;
 
-    // === GOOGLE ANALYTICS ESEMÉNY BEKÜLDÉSE ===
-    if (typeof window.gtag === 'function') {
-        const userId = localStorage.getItem('anon_user_id') || 'ismeretlen';
-        window.gtag('event', 'generate_ic', {
-            'ic_type': code,          // A kiválasztott IC kódja
-            'amount': amount,         // A beírt mennyiség
-            'client_id': userId       // Az eszköz egyedi azonosítója
+    // === ÚJ: SAJÁT FIREBASE ANALITIKA MENTÉSE ===
+    try {
+        await addDoc(collection(db, 'logs'), {
+            icCode: code,
+            amount: amount,
+            userId: userId,
+            timestamp: new Date().toISOString()
         });
+    } catch (err) {
+        console.error("Nem sikerült menteni a statisztikát", err);
     }
 
     document.getElementById('qrFullscreen').classList.remove('hidden');
@@ -155,6 +156,57 @@ window.closeQr = () => {
     document.getElementById('qrFullscreen').classList.add('hidden');
     document.getElementById('genAmount').value = '';
     document.getElementById('genSelect').value = '';
+};
+
+// === ÚJ: STATISZTIKA BETÖLTÉSE ===
+window.loadStats = async () => {
+    try {
+        haptic('light');
+        const statTodayCount = document.getElementById('statTodayCount');
+        const statTopIc = document.getElementById('statTopIc');
+        
+        if (statTodayCount) statTodayCount.innerText = "Frissítés...";
+        if (statTopIc) statTopIc.innerText = "Betöltés...";
+
+        // Mai nap kezdete
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayStr = today.toISOString();
+        
+        // Letöltjük az összes logot (ezt később lehet optimalizálni query-vel)
+        const querySnapshot = await getDocs(collection(db, 'logs'));
+        
+        let todayCount = 0;
+        const icCounts = {};
+
+        // Végigmegyünk az adatokon és szűrjük a maiakat
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.timestamp && data.timestamp >= todayStr) {
+                todayCount++;
+                icCounts[data.icCode] = (icCounts[data.icCode] || 0) + 1;
+            }
+        });
+
+        // Kikeressük a legnagyobbat
+        let topIc = "Nincs még adat mára";
+        let maxCount = 0;
+        for (const [ic, count] of Object.entries(icCounts)) {
+            if (count > maxCount) {
+                maxCount = count;
+                topIc = `${formatIC(ic)} (${count}x)`;
+            }
+        }
+
+        // Képernyő frissítése
+        if (statTodayCount) statTodayCount.innerText = todayCount;
+        if (statTopIc) statTopIc.innerText = topIc;
+
+    } catch (error) {
+        console.error("Hiba a statisztika betöltésekor", error);
+        const statTopIc = document.getElementById('statTopIc');
+        if (statTopIc) statTopIc.innerText = "Hiba történt a betöltéskor.";
+    }
 };
 
 // === ADMIN ===
@@ -235,7 +287,6 @@ const showToast = (m) => {
 if ('serviceWorker' in navigator) {
     let refreshing = false;
 
-    // Ha az új verzió átveszi az irányítást, frissítsük az oldalt
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!refreshing) {
             window.location.reload();
@@ -247,7 +298,6 @@ if ('serviceWorker' in navigator) {
         reg.addEventListener('updatefound', () => {
             const newWorker = reg.installing;
             newWorker.addEventListener('statechange', () => {
-                // Ha sikeresen letöltött egy új verziót, és van már egy régi aktív
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                     showUpdateBanner(newWorker);
                 }
@@ -256,7 +306,6 @@ if ('serviceWorker' in navigator) {
     }).catch(err => console.error("SW hiba:", err));
 }
 
-// A vizuális "Frissítés" banner létrehozása
 function showUpdateBanner(worker) {
     haptic('success');
     const banner = document.createElement('div');
@@ -270,7 +319,6 @@ function showUpdateBanner(worker) {
     document.getElementById('reloadAppBtn').addEventListener('click', () => {
         haptic('light');
         banner.innerHTML = 'Frissítés folyamatban...';
-        // Szólunk a Service Workernek, hogy aktiválja az új kódot
         worker.postMessage({ type: 'SKIP_WAITING' });
     });
 }
