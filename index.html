@@ -4,20 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>IC Generator</title>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-051XQX9N4B"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-051XQX9N4B');
-</script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff5f00">
     <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="apple-touch-icon" href="/ic-generator/icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+    <link rel="apple-touch-icon" href="/ic-generator/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
     
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -37,6 +28,7 @@
 </nav>
 
 <main class="container">
+    <!-- GENERÁTOR FÜL -->
     <div id="tab-generator">
         <div class="minimal-card">
             <div class="pill-nav">
@@ -56,6 +48,7 @@
         </div>
     </div>
 
+    <!-- ADMIN FÜL -->
     <div id="tab-admin" class="hidden">
         <div class="minimal-card">
             <h5 class="fw-bold mb-3">IC Adatbázis</h5>
@@ -64,9 +57,26 @@
         </div>
     </div>
 
+    <!-- ÚJ: STATISZTIKA FÜL -->
+    <div id="tab-stat" class="hidden">
+        <div class="minimal-card">
+            <h5 class="fw-bold mb-3">📊 Napi Statisztika</h5>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small">Mai generálások száma:</span>
+                <strong id="statTodayCount" class="fs-5 text-primary">0</strong>
+            </div>
+            <div class="mt-3">
+                <span class="text-muted small">Legnépszerűbb IC (Ma):</span>
+                <div id="statTopIc" class="fw-bold mt-1" style="word-break: break-all;">Nincs még adat</div>
+            </div>
+            <button class="btn btn-primary w-100 mt-4" onclick="loadStats()">Adatok frissítése</button>
+        </div>
+    </div>
+
+    <!-- INFÓ FÜL -->
     <div id="tab-info" class="hidden">
         <div class="minimal-card">
-            <h5 class="fw-bold mb-4">📱 Telepítés (PWA - Progressive Web App)</h5>
+            <h5 class="fw-bold mb-4">📱 Telepítés (PWA)</h5>
             <div class="info-block">
                 <strong>🍏 iPhone (Safari böngésző)</strong>
                 <ol style="margin-top:5px; margin-bottom:0; padding-left:20px; font-size:0.8rem; color:var(--tx2); line-height:1.5;">
@@ -81,32 +91,29 @@
                 <ol style="margin-top:5px; margin-bottom:0; padding-left:20px; font-size:0.8rem; color:var(--tx2); line-height:1.5;">
                   <li>Nyisd meg ezt a linket a <strong>Chrome</strong> böngészőben.</li>
                   <li>Koppints a jobb felső sarokban lévő <strong>Menü</strong> (három pötty) ikonra.</li>
-                  <li>Válaszd a <strong>Hozzáadás a kezdőképernyőhöz</strong> (vagy Alkalmazás telepítése) opciót.</li>
-                  <li>Koppints a <strong>Telepítés</strong> vagy Hozzáadás gombra.</li>
-                  <li>(Elrendezés zárolása → kapcsold ki)</li>
+                  <li>Válaszd a <strong>Hozzáadás a kezdőképernyőhöz</strong> opciót.</li>
+                  <li>Koppints a <strong>Telepítés</strong> gombra.</li>
                 </ol>
             </div>
             <div class="info-block highlight mt-3 p-3 rounded" style="background: rgba(157, 41, 178, 0.05);">
                 <h6 class="text-primary mb-1">🔄 Hogyan frissül az app?</h6>
-                <p class="margin-top:5px; margin-bottom:0; padding-left:20px; font-size:0.8rem; color:var(--tx2); line-height:1.5;">Mivel a generátor internet nélkül is működik, a frissítéseket a háttérben tölti le. Ha új verzió jelenik meg, 
-        a képernyő alján felugrik egy <strong>"Frissítés"</strong> gomb. Csak koppints rá, és azonnal a legújabb verziót fogod látni!</p>
+                <p style="margin-top:5px; margin-bottom:0; font-size:0.8rem; color:var(--tx2); line-height:1.5;">A frissítéseket a háttérben tölti le. Ha új verzió jelenik meg, felugrik egy <strong>"Frissítés"</strong> gomb. Csak koppints rá!</p>
             </div>
             <div class="info-block mt-4">
-                <h6>📧 Kapcsolat és Hibajelentés</h6>
-                <p style="font-size:0.8rem; color:var(--tx2); margin-bottom:8px;">
-                    Fejlesztéssel, módosítással vagy hibajelentéssel kapcsolatban az alábbi címeken érhetsz el:
-                  </p>
+                <h6>📧 Kapcsolat</h6>
                 <a href="mailto:gabor.2.kovacs@aumovio.com" class="contact-link text-decoration-none fw-bold" style="color: #9d29b2;">gabor.2.kovacs@aumovio.com</a>
             </div>
-            <div class="version-footer text-center mt-4 small text-muted">Készítette: Kovács Gábor · Verzió: 1.2.0</div>
+            <div class="version-footer text-center mt-4 small text-muted">Készítette: Kovács Gábor · Verzió: 1.1.5</div>
             <button class="btn btn-primary w-100 mt-3" onclick="showTab('generator')">Rendben</button>
         </div>
     </div>
 </main>
 
+<!-- ALSÓ MENÜ BŐVÍTVE 4 IKONRA -->
 <nav class="bottom-nav">
     <button class="active" onclick="showTab('generator')"><span class="nav-ico">⚡</span>Generátor</button>
     <button onclick="showTab('admin')"><span class="nav-ico">🗂️</span>Admin</button>
+    <button onclick="showTab('stat')"><span class="nav-ico">📊</span>Stat</button>
     <button onclick="showTab('info')"><span class="nav-ico">ℹ️</span>Infó</button>
 </nav>
 
