@@ -57,19 +57,49 @@
         </div>
     </div>
 
-    <!-- ÚJ: STATISZTIKA FÜL -->
+        <!-- STATISZTIKA FÜL -->
     <div id="tab-stat" class="hidden">
         <div class="minimal-card">
-            <h5 class="fw-bold mb-3">📊 Napi Statisztika</h5>
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="text-muted small">Mai generálások száma:</span>
-                <strong id="statTodayCount" class="fs-5 text-primary">0</strong>
+            <h5 class="fw-bold mb-4">📊 Részletes Statisztika</h5>
+            
+            <!-- NAPI BLOKK -->
+            <h6 class="text-primary mb-2 fw-bold">Ma</h6>
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                <span class="text-muted small">Generálások száma:</span>
+                <strong id="statDayCount">0</strong>
             </div>
-            <div class="mt-3">
-                <span class="text-muted small">Legnépszerűbb IC (Ma):</span>
-                <div id="statTopIc" class="fw-bold mt-1" style="word-break: break-all;">Nincs még adat</div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <span class="text-muted small">Legnépszerűbb IC:</span>
+                <strong id="statDayTop">Nincs még adat</strong>
             </div>
-            <button class="btn btn-primary w-100 mt-4" onclick="loadStats()">Adatok frissítése</button>
+
+            <!-- HAVI BLOKK -->
+            <h6 class="text-primary mb-2 fw-bold">Ebben a hónapban</h6>
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                <span class="text-muted small">Generálások száma:</span>
+                <strong id="statMonthCount">0</strong>
+            </div>
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                <span class="text-muted small">Igényelt darabszám összesen:</span>
+                <strong id="statMonthAmount">0 db</strong>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <span class="text-muted small">Havi legnépszerűbb:</span>
+                <strong id="statMonthTop">Nincs még adat</strong>
+            </div>
+
+            <!-- ÖSSZESÍTETT BLOKK -->
+            <h6 class="text-primary mb-2 fw-bold">Mindenkori összesítő</h6>
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                <span class="text-muted small">Összes generálás:</span>
+                <strong id="statAllCount">0</strong>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="text-muted small">Különböző eszközök (felhasználók):</span>
+                <strong id="statAllUsers">0</strong>
+            </div>
+
+            <button class="btn btn-outline-primary w-100 mt-4" style="border-style:dashed" onclick="loadStats()">🔄 Adatok frissítése</button>
         </div>
     </div>
 
