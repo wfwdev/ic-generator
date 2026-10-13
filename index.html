@@ -57,21 +57,74 @@
         </div>
     </div>
 
-        <!-- STATISZTIKA FÜL -->
+            <!-- STATISZTIKA FÜL -->
     <div id="tab-stat" class="hidden">
         <div class="minimal-card">
-            <h5 class="fw-bold mb-4">📊 Részletes Statisztika</h5>
+            <h5 class="fw-bold mb-4">📊 Műszerfal</h5>
             
             <!-- NAPI BLOKK -->
-            <h6 class="text-primary mb-2 fw-bold">Ma</h6>
-            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-                <span class="text-muted small">Generálások száma:</span>
-                <strong id="statDayCount">0</strong>
+            <div class="p-3 mb-4 rounded" style="background: var(--sur2); border: 1px solid var(--bord);">
+                <h6 class="text-primary mb-3 fw-bold d-flex align-items-center gap-2">
+                    <span style="font-size: 1.2rem;">⚡</span> Mai aktivitás
+                </h6>
+                <div class="row text-center mb-3">
+                    <div class="col-6 border-end" style="border-color: var(--bord) !important;">
+                        <div class="text-muted small mb-1">Generálások</div>
+                        <strong class="fs-3" id="statDayCount">0</strong>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small mb-1">Készült darab</div>
+                        <strong class="fs-3" id="statDayAmount">0</strong>
+                    </div>
+                </div>
+                <div class="p-2 rounded text-center" style="background: var(--sur); border: 1px dashed var(--bord);">
+                    <div class="text-muted small mb-1">Mai kedvenc IC:</div>
+                    <strong id="statDayTop" class="text-primary" style="word-break: break-all; font-family: monospace; font-size: 1.1rem;">-</strong>
+                </div>
             </div>
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <span class="text-muted small">Legnépszerűbb IC:</span>
-                <strong id="statDayTop">Nincs még adat</strong>
+
+            <!-- HAVI BLOKK -->
+            <div class="p-3 mb-4 rounded" style="background: var(--sur2); border: 1px solid var(--bord);">
+                <h6 class="text-primary mb-3 fw-bold d-flex align-items-center gap-2">
+                    <span style="font-size: 1.2rem;">📅</span> Ebben a hónapban
+                </h6>
+                <div class="row text-center mb-3">
+                    <div class="col-6 border-end" style="border-color: var(--bord) !important;">
+                        <div class="text-muted small mb-1">Generálások</div>
+                        <strong class="fs-3" id="statMonthCount">0</strong>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small mb-1">Összes darab</div>
+                        <strong class="fs-3" id="statMonthAmount">0</strong>
+                    </div>
+                </div>
+                <div class="p-2 rounded text-center" style="background: var(--sur); border: 1px dashed var(--bord);">
+                    <div class="text-muted small mb-1">Havi kedvenc IC:</div>
+                    <strong id="statMonthTop" class="text-primary" style="word-break: break-all; font-family: monospace; font-size: 1.1rem;">-</strong>
+                </div>
             </div>
+
+            <!-- ÖSSZESÍTETT BLOKK -->
+            <div class="p-3 rounded" style="background: var(--sur2); border: 1px solid var(--bord);">
+                <h6 class="text-primary mb-3 fw-bold d-flex align-items-center gap-2">
+                    <span style="font-size: 1.2rem;">🌍</span> Teljes élettartam
+                </h6>
+                <div class="row text-center">
+                    <div class="col-6 border-end" style="border-color: var(--bord) !important;">
+                        <div class="text-muted small mb-1">Összes generálás</div>
+                        <strong class="fs-4" id="statAllCount">0</strong>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small mb-1">Felhasználók</div>
+                        <strong class="fs-4" id="statAllUsers">0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-outline-primary w-100 mt-4" style="border-style:dashed" onclick="loadStats()">🔄 Adatok frissítése</button>
+        </div>
+    </div>
+
 
             <!-- HAVI BLOKK -->
             <h6 class="text-primary mb-2 fw-bold">Ebben a hónapban</h6>
