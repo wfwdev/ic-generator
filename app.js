@@ -163,7 +163,7 @@ window.loadStats = async () => {
     try {
         haptic('light');
         
-        // 1. Dátumok meghatározása
+        // Dátumok meghatározása
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
         const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
@@ -172,11 +172,11 @@ window.loadStats = async () => {
         
         // Változók a számoláshoz
         let dayCount = 0, monthCount = 0, allCount = 0;
-        let monthAmount = 0;
+        let dayAmount = 0, monthAmount = 0; // Itt vettük fel a dayAmount változót
         const dayIcs = {}, monthIcs = {};
         const uniqueUsers = new Set();
 
-        // 2. Adatok szétválogatása
+        // Adatok szétválogatása
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             if (!data.timestamp) return;
@@ -195,6 +195,7 @@ window.loadStats = async () => {
             // Mai adatok
             if (data.timestamp >= today) {
                 dayCount++;
+                dayAmount += (data.amount || 0); // Hozzáadjuk a mai darabszámot is
                 dayIcs[data.icCode] = (dayIcs[data.icCode] || 0) + 1;
             }
         });
@@ -212,8 +213,9 @@ window.loadStats = async () => {
             return topIc;
         };
 
-        // 3. Adatok kiírása a felületre
+        // Adatok kiírása a felületre
         document.getElementById('statDayCount').innerText = dayCount;
+        document.getElementById('statDayAmount').innerText = dayAmount.toLocaleString('hu-HU') + ' db';
         document.getElementById('statDayTop').innerText = getTopIc(dayIcs);
         
         document.getElementById('statMonthCount').innerText = monthCount;
@@ -228,6 +230,7 @@ window.loadStats = async () => {
         showToast("Hiba történt az adatok letöltésekor!");
     }
 };
+
 
 
 // === ADMIN ===
