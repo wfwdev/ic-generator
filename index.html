@@ -211,6 +211,38 @@
     </div>
 </div>
 
+<!-- ÚJ OLDALSÓ PROFIL MENÜ -->
+<div class="side-overlay" id="sideOverlay" onclick="closeSideMenu()"></div>
+<div class="side-menu" id="sideMenu">
+    <h5 class="fw-bold mb-4 text-primary d-flex align-items-center gap-2">
+        <span style="font-size: 1.5rem;">👤</span> Profil adatok
+    </h5>
+    
+    <div class="info-block highlight mb-4">
+        <p style="font-size: 0.8rem; line-height: 1.4;">A generátor használatához kérlek add meg a nevedet és válaszd ki a műszakodat. Ezt csak egyszer kell beállítanod.</p>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label small fw-bold">Név / Azonosító *</label>
+        <input type="text" id="profileName" class="form-control" placeholder="Pl. Kiss János">
+    </div>
+    <div class="mb-4">
+        <label class="form-label small fw-bold">Műszak *</label>
+        <select id="profileShift" class="form-select">
+            <option value="">-- Válassz műszakot --</option>
+            <option value="Délelőtt">Délelőtt (06:00 - 14:00)</option>
+            <option value="Délután">Délután (14:00 - 22:00)</option>
+            <option value="Éjszaka">Éjszaka (22:00 - 06:00)</option>
+        </select>
+    </div>
+    
+    <div class="mt-auto pb-4">
+        <button class="btn btn-primary w-100 btn-lg" onclick="saveProfile()">Adatok Mentése</button>
+    </div>
+</div>
+<!-- PROFIL MENÜ VÉGE -->
+
+
 <div class="toast-container"><div id="liveToast" class="toast align-items-center text-white bg-dark border-0" role="alert"><div class="d-flex"><div class="toast-body" id="toastMsg"></div></div></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
