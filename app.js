@@ -4,7 +4,6 @@ if (!localStorage.getItem('anon_user_id')) {
 const userId = localStorage.getItem('anon_user_id');
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-// ÚJ: A getDocs hozzáadva az importokhoz a statisztika lekéréséhez
 import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, enableIndexedDbPersistence, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -20,7 +19,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 enableIndexedDbPersistence(db).catch(() => console.warn("Offline mód korlátozott"));
 
-// === HAPTIKUS VISSZAJELZÉS ===
 const haptic = (type = 'light') => {
     if (!("vibrate" in navigator)) return;
     try {
@@ -30,7 +28,6 @@ const haptic = (type = 'light') => {
     } catch (e) {}
 };
 
-// === IC FORMÁZÓ ===
 const formatIC = (raw) => {
     if (!raw) return ''; 
     const c = String(raw).replace(/[^A-Z0-9]/gi, '').toUpperCase();
@@ -38,7 +35,6 @@ const formatIC = (raw) => {
     return `${c.slice(0,2)}.${c.slice(2,6)}-${c.slice(6,10)}.${c.slice(10,11)}.${c.slice(11,13)}`;
 };
 
-// === SÖTÉT MÓD LOGIKA ===
 const themeToggle = document.getElementById('themeToggle');
 if (themeToggle) {
     const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -56,7 +52,6 @@ if (themeToggle) {
 
 let icDatabase = [], currentGenType = 'ESS', editIcId = null;
 
-// === ADATBÁZIS FIGYELÉS ===
 onSnapshot(collection(db, 'ic_numbers'), (snap) => {
     icDatabase = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderAdminList();
@@ -65,7 +60,6 @@ onSnapshot(collection(db, 'ic_numbers'), (snap) => {
     console.error("Firebase lekérési hiba: ", error);
 });
 
-// === UI KEZELÉS ===
 window.showTab = (name) => {
     haptic('light');
     ['generator', 'admin', 'stat', 'info'].forEach(t => { 
@@ -74,7 +68,6 @@ window.showTab = (name) => {
     });
     document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.toggle('active', b.getAttribute('onclick').includes(name)));
     
-    // ÚJ: Ha a statisztika fülre váltunk, betöltjük az adatokat
     if (name === 'stat') {
         window.loadStats();
     }
@@ -95,7 +88,6 @@ const updateGenSelect = () => {
         filtered.map(ic => `<option value="${ic.code}">${formatIC(ic.code)}</option>`).join('') : '<option>Nincs adat</option>';
 };
 
-// === GENERÁTOR ===
 window.generateData = async () => {
     const code = document.getElementById('genSelect').value;
     const amountStr = document.getElementById('genAmount').value;
@@ -130,7 +122,6 @@ window.generateData = async () => {
     document.getElementById('q1-text').innerHTML = `<strong style="color:#000">${qr1Text}</strong>`;
     document.getElementById('q2-text').innerHTML = `<strong style="color:#000">${formatIC(cleanIC)}${paddedAmount}${r10}</strong>`;
 
-    // === ÚJ: SAJÁT FIREBASE ANALITIKA MENTÉSE ===
     try {
         await addDoc(collection(db, 'logs'), {
             icCode: code,
@@ -158,32 +149,39 @@ window.closeQr = () => {
     document.getElementById('genSelect').value = '';
 };
 
-// === STATISZTIKA BETÖLTÉSE (BŐVÍTETT) ===
+// === BŐVÍTETT STATISZTIKA ===
 window.loadStats = async () => {
     try {
         haptic('light');
         
-        // Dátumok meghatározása
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
         const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
         
         const querySnapshot = await getDocs(collection(db, 'logs'));
         
-        // Változók a számoláshoz
         let dayCount = 0, monthCount = 0, allCount = 0;
-        let dayAmount = 0, monthAmount = 0; // Itt vettük fel a dayAmount változót
+        let dayAmount = 0, monthAmount = 0;
         const dayIcs = {}, monthIcs = {};
+        
+        // ÚJ: Külön objektum a részletes listához (Minden adatot ide gyűjtünk)
+        const allIcsBreakdown = {}; 
         const uniqueUsers = new Set();
 
-        // Adatok szétválogatása
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             if (!data.timestamp) return;
 
-            // Összesített adatok
+            // Összesített adatok (Mindenkori)
             allCount++;
             if (data.userId) uniqueUsers.add(data.userId);
+
+            // Alapanyag részletező (Mindenkori halmozott)
+            if (!allIcsBreakdown[data.icCode]) {
+                allIcsBreakdown[data.icCode] = { count: 0, amount: 0 };
+            }
+            allIcsBreakdown[data.icCode].count++;
+            allIcsBreakdown[data.icCode].amount += (data.amount || 0);
 
             // Havi adatok
             if (data.timestamp >= firstDayOfMonth) {
@@ -195,12 +193,11 @@ window.loadStats = async () => {
             // Mai adatok
             if (data.timestamp >= today) {
                 dayCount++;
-                dayAmount += (data.amount || 0); // Hozzáadjuk a mai darabszámot is
+                dayAmount += (data.amount || 0);
                 dayIcs[data.icCode] = (dayIcs[data.icCode] || 0) + 1;
             }
         });
 
-        // Segédfüggvény a legnépszerűbb megtalálásához
         const getTopIc = (countsObj) => {
             let topIc = "Nincs adat";
             let maxCount = 0;
@@ -213,7 +210,7 @@ window.loadStats = async () => {
             return topIc;
         };
 
-        // Adatok kiírása a felületre
+        // Kártyák frissítése
         document.getElementById('statDayCount').innerText = dayCount;
         document.getElementById('statDayAmount').innerText = dayAmount.toLocaleString('hu-HU') + ' db';
         document.getElementById('statDayTop').innerText = getTopIc(dayIcs);
@@ -225,15 +222,32 @@ window.loadStats = async () => {
         document.getElementById('statAllCount').innerText = allCount;
         document.getElementById('statAllUsers').innerText = uniqueUsers.size;
 
+        // ÚJ: Alapanyag lista renderelése (Csökkenő sorrendben a generálások száma alapján)
+        const statIcBreakdownEl = document.getElementById('statIcBreakdown');
+        if (statIcBreakdownEl) {
+            const sortedIcs = Object.entries(allIcsBreakdown).sort((a, b) => b[1].count - a[1].count);
+            
+            if (sortedIcs.length === 0) {
+                statIcBreakdownEl.innerHTML = '<div class="text-center text-muted small py-2">Nincs még rögzített adat.</div>';
+            } else {
+                statIcBreakdownEl.innerHTML = sortedIcs.map(([ic, stats]) => `
+                    <div class="d-flex justify-content-between align-items-center p-2 rounded mb-1" style="background: var(--sur); border: 1px solid var(--bord);">
+                        <strong class="text-primary" style="font-family: monospace; font-size: 0.95rem;">${formatIC(ic)}</strong>
+                        <div class="text-end">
+                            <div class="fw-bold" style="font-size: 0.9rem;">${stats.count}x generálva</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">Összesen: ${stats.amount.toLocaleString('hu-HU')} db</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
     } catch (error) {
         console.error("Hiba a statisztika betöltésekor", error);
         showToast("Hiba történt az adatok letöltésekor!");
     }
 };
 
-
-
-// === ADMIN ===
 const renderAdminList = () => {
     const list = document.getElementById('adminList');
     if (!list) return;
@@ -307,10 +321,8 @@ const showToast = (m) => {
     }
 };
 
-// === PWA FRISSÍTÉS DETEKTOR ÉS BANNER ===
 if ('serviceWorker' in navigator) {
     let refreshing = false;
-
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!refreshing) {
             window.location.reload();
@@ -342,7 +354,7 @@ function showUpdateBanner(worker) {
 
     document.getElementById('reloadAppBtn').addEventListener('click', () => {
         haptic('light');
-        banner.innerHTML = 'Frissítés folyamatban...';
+        banner.innerHTML = 'Frissítés...';
         worker.postMessage({ type: 'SKIP_WAITING' });
     });
 }
