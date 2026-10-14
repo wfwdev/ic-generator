@@ -250,3 +250,41 @@ body.dark-mode .navbar-title {
 .update-banner button:active {
     transform: scale(0.95);
 }
+
+/* ==========================================================================
+   Hamburger Menü & Oldalsó Profil (ÚJ)
+   ========================================================================== */
+.hamburger-btn { 
+    width: 40px; height: 40px; 
+    background: transparent; border: none; 
+    display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; 
+    z-index: 2100; /* Legfelülre kerüljön */
+}
+.hamburger-btn span { 
+    width: 25px; height: 3px; 
+    background: #fff; border-radius: 3px; 
+    transition: all 0.3s ease; 
+}
+.hamburger-btn.open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+.hamburger-btn.open span:nth-child(2) { opacity: 0; }
+.hamburger-btn.open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+
+.side-menu { 
+    position: fixed; top: 0; left: -300px; 
+    width: 280px; height: 100vh; 
+    background: var(--sur); z-index: 2050; 
+    transition: left 0.3s ease; 
+    padding: 85px 20px 20px; /* A 85px a navbar miatt kell */
+    box-shadow: 2px 0 15px rgba(0,0,0,0.15); 
+    display: flex; flex-direction: column;
+}
+.side-menu.open { left: 0; }
+
+.side-overlay { 
+    position: fixed; inset: 0; 
+    background: rgba(0,0,0,0.6); 
+    z-index: 2040; 
+    opacity: 0; visibility: hidden; 
+    transition: all 0.3s ease; 
+}
+.side-overlay.open { opacity: 1; visibility: visible; }
