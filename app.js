@@ -88,7 +88,82 @@ const updateGenSelect = () => {
         filtered.map(ic => `<option value="${ic.code}">${formatIC(ic.code)}</option>`).join('') : '<option>Nincs adat</option>';
 };
 
+// === PROFIL ÉS HAMBURGER MENÜ LOGIKA ===
+window.toggleSideMenu = () => {
+    haptic('light');
+    const menu = document.getElementById('sideMenu');
+    const overlay = document.getElementById('sideOverlay');
+    const btn = document.getElementById('hamburgerBtn');
+    if (!menu || !overlay || !btn) return;
+    
+    const isOpen = menu.classList.contains('open');
+    
+    if (isOpen) {
+        // Zárás blokkolása, ha nincs kitöltve
+        if (!localStorage.getItem('userName') || !localStorage.getItem('userShift')) {
+            haptic('error');
+            return showToast("Kérlek, töltsd ki az adatokat a folytatáshoz!");
+        }
+        menu.classList.remove('open');
+        overlay.classList.remove('open');
+        btn.classList.remove('open');
+    } else {
+        // Nyitás
+        menu.classList.add('open');
+        overlay.classList.add('open');
+        btn.classList.add('open');
+        document.getElementById('profileName').value = localStorage.getItem('userName') || '';
+        document.getElementById('profileShift').value = localStorage.getItem('userShift') || '';
+    }
+};
+
+window.closeSideMenu = () => {
+    const menu = document.getElementById('sideMenu');
+    if(menu && menu.classList.contains('open')) toggleSideMenu();
+};
+
+window.saveProfile = () => {
+    const name = document.getElementById('profileName').value.trim();
+    const shift = document.getElementById('profileShift').value;
+    
+    if (!name || !shift) {
+        haptic('error');
+        return showToast("Minden mező kitöltése kötelező!");
+    }
+    
+    localStorage.setItem('userName', name);
+    localStorage.setItem('userShift', shift);
+    haptic('success');
+    showToast("Profil sikeresen mentve!");
+    
+    // Most már be lehet zárni
+    document.getElementById('sideMenu').classList.remove('open');
+    document.getElementById('sideOverlay').classList.remove('open');
+    document.getElementById('hamburgerBtn').classList.remove('open');
+};
+
+// Automatikus ellenőrzés induláskor
+setTimeout(() => {
+    if (!localStorage.getItem('userName') || !localStorage.getItem('userShift')) {
+        const menu = document.getElementById('sideMenu');
+        if (menu && !menu.classList.contains('open')) {
+            toggleSideMenu();
+            showToast("Üdv! Első lépésként add meg az adataidat.");
+        }
+    }
+}, 800);
+
+// === GENERÁTOR ===
 window.generateData = async () => {
+    // 1. KÖTELEZŐ PROFIL ELLENŐRZÉS
+    if (!localStorage.getItem('userName') || !localStorage.getItem('userShift')) {
+        haptic('error');
+        showToast("Előbb töltsd ki a profilt!");
+        const menu = document.getElementById('sideMenu');
+        if(menu && !menu.classList.contains('open')) toggleSideMenu();
+        return;
+    }
+
     const code = document.getElementById('genSelect').value;
     const amountStr = document.getElementById('genAmount').value;
     const amount = parseInt(amountStr);
@@ -122,11 +197,14 @@ window.generateData = async () => {
     document.getElementById('q1-text').innerHTML = `<strong style="color:#000">${qr1Text}</strong>`;
     document.getElementById('q2-text').innerHTML = `<strong style="color:#000">${formatIC(cleanIC)}${paddedAmount}${r10}</strong>`;
 
+    // 2. FRISSÍTETT FIREBASE MENTÉS (Bekerül a Név és a Műszak)
     try {
         await addDoc(collection(db, 'logs'), {
             icCode: code,
             amount: amount,
             userId: userId,
+            userName: localStorage.getItem('userName'),
+            userShift: localStorage.getItem('userShift'),
             timestamp: new Date().toISOString()
         });
     } catch (err) {
@@ -164,7 +242,6 @@ window.loadStats = async () => {
         let dayAmount = 0, monthAmount = 0;
         const dayIcs = {}, monthIcs = {};
         
-        // ÚJ: Külön objektum a részletes listához (Minden adatot ide gyűjtünk)
         const allIcsBreakdown = {}; 
         const uniqueUsers = new Set();
 
@@ -222,7 +299,7 @@ window.loadStats = async () => {
         document.getElementById('statAllCount').innerText = allCount;
         document.getElementById('statAllUsers').innerText = uniqueUsers.size;
 
-        // ÚJ: Alapanyag lista renderelése (Csökkenő sorrendben a generálások száma alapján)
+        // Alapanyag lista renderelése (Csökkenő sorrendben a generálások száma alapján)
         const statIcBreakdownEl = document.getElementById('statIcBreakdown');
         if (statIcBreakdownEl) {
             const sortedIcs = Object.entries(allIcsBreakdown).sort((a, b) => b[1].count - a[1].count);
@@ -248,6 +325,7 @@ window.loadStats = async () => {
     }
 };
 
+// === ADMIN ===
 const renderAdminList = () => {
     const list = document.getElementById('adminList');
     if (!list) return;
@@ -309,7 +387,8 @@ window.deleteIc = async () => {
 
 window.closeModal = (id) => {
     haptic('light');
-    document.getElementById(id).classList.remove('open');
+    const modal = document.getElementById(id);
+    if(modal) modal.classList.remove('open');
 };
 
 const showToast = (m) => {
@@ -321,6 +400,7 @@ const showToast = (m) => {
     }
 };
 
+// === PWA FRISSÍTÉS DETEKTOR ÉS BANNER ===
 if ('serviceWorker' in navigator) {
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
