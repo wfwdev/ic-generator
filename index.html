@@ -57,7 +57,7 @@
         </div>
     </div>
 
-            <!-- STATISZTIKA FÜL -->
+    <!-- STATISZTIKA FÜL -->
     <div id="tab-stat" class="hidden">
         <div class="minimal-card">
             <h5 class="fw-bold mb-4">📊 Műszerfal</h5>
@@ -121,35 +121,15 @@
                 </div>
             </div>
 
-            <button class="btn btn-outline-primary w-100 mt-4" style="border-style:dashed" onclick="loadStats()">🔄 Adatok frissítése</button>
-        </div>
-    </div>
-
-
-            <!-- HAVI BLOKK -->
-            <h6 class="text-primary mb-2 fw-bold">Ebben a hónapban</h6>
-            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-                <span class="text-muted small">Generálások száma:</span>
-                <strong id="statMonthCount">0</strong>
-            </div>
-            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-                <span class="text-muted small">Igényelt darabszám összesen:</span>
-                <strong id="statMonthAmount">0 db</strong>
-            </div>
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <span class="text-muted small">Havi legnépszerűbb:</span>
-                <strong id="statMonthTop">Nincs még adat</strong>
-            </div>
-
-            <!-- ÖSSZESÍTETT BLOKK -->
-            <h6 class="text-primary mb-2 fw-bold">Mindenkori összesítő</h6>
-            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-                <span class="text-muted small">Összes generálás:</span>
-                <strong id="statAllCount">0</strong>
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="text-muted small">Különböző eszközök (felhasználók):</span>
-                <strong id="statAllUsers">0</strong>
+            <!-- ÚJ: RÉSZLETES IC ALAPANYAG LISTA -->
+            <div class="p-3 mt-4 rounded" style="background: var(--sur2); border: 1px solid var(--bord);">
+                <h6 class="text-primary mb-3 fw-bold d-flex align-items-center gap-2">
+                    <span style="font-size: 1.2rem;">📦</span> Alapanyagok összesítője
+                </h6>
+                <div id="statIcBreakdown" class="d-flex flex-column gap-2" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                    <!-- Ide töltődik be a lista a JS-ből -->
+                    <div class="text-center text-muted small py-2">Adatok betöltése...</div>
+                </div>
             </div>
 
             <button class="btn btn-outline-primary w-100 mt-4" style="border-style:dashed" onclick="loadStats()">🔄 Adatok frissítése</button>
@@ -186,13 +166,13 @@
                 <h6>📧 Kapcsolat</h6>
                 <a href="mailto:gabor.2.kovacs@aumovio.com" class="contact-link text-decoration-none fw-bold" style="color: #9d29b2;">gabor.2.kovacs@aumovio.com</a>
             </div>
-            <div class="version-footer text-center mt-4 small text-muted">Készítette: Kovács Gábor · Verzió: 1.2.1</div>
+            <div class="version-footer text-center mt-4 small text-muted">Készítette: Kovács Gábor · Verzió: 1.2.2</div>
             <button class="btn btn-primary w-100 mt-3" onclick="showTab('generator')">Rendben</button>
         </div>
     </div>
 </main>
 
-<!-- ALSÓ MENÜ BŐVÍTVE 4 IKONRA -->
+<!-- ALSÓ MENÜ -->
 <nav class="bottom-nav">
     <button class="active" onclick="showTab('generator')"><span class="nav-ico">⚡</span>Generátor</button>
     <button onclick="showTab('admin')"><span class="nav-ico">🗂️</span>Admin</button>
