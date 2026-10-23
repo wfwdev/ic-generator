@@ -396,7 +396,7 @@ const showToast = (m) => {
     }
 };
 
-// === PWA FRISSÍTÉS DETEKTOR ÉS BANNER ===
+// === PWA FRISSÍTÉS DETEKTOR ÉS ÉRTESÍTŐ ===
 if ('serviceWorker' in navigator) {
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -411,26 +411,25 @@ if ('serviceWorker' in navigator) {
             const newWorker = reg.installing;
             newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    showUpdateBanner(newWorker);
+                    showUpdateButton(newWorker);
                 }
             });
         });
     }).catch(err => console.error("SW hiba:", err));
 }
 
-function showUpdateBanner(worker) {
+function showUpdateButton(worker) {
     haptic('success');
-    const banner = document.createElement('div');
-    banner.className = 'update-banner';
-    banner.innerHTML = `
-        <span>Új verzió elérhető!</span>
-        <button id="reloadAppBtn">Frissítés</button>
-    `;
-    document.body.appendChild(banner);
-
-    document.getElementById('reloadAppBtn').addEventListener('click', () => {
-        haptic('light');
-        banner.innerHTML = 'Frissítés...';
-        worker.postMessage({ type: 'SKIP_WAITING' });
-    });
+    const updateBtn = document.getElementById('updateBadgeBtn');
+    if (updateBtn) {
+        updateBtn.classList.remove('hidden'); // Pulzáló gomb megjelenítése
+        
+        updateBtn.addEventListener('click', () => {
+            haptic('light');
+            updateBtn.innerText = 'Töltés...';
+            updateBtn.style.animation = 'none'; // Animáció leállítása kattintáskor
+            worker.postMessage({ type: 'SKIP_WAITING' });
+        });
+    }
 }
+
