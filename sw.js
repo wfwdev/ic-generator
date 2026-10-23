@@ -11,8 +11,6 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
-  // Ez a sor kényszeríti az azonnali frissítést, megkerülve a beragadt cache-t
-  self.skipWaiting(); 
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
