@@ -19,7 +19,39 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 enableIndexedDbPersistence(db).catch(() => console.warn("Offline mód korlátozott"));
 
+// === ÚJ: KÉPERNYŐ ÉBRENTARTÁS (Wake Lock API) ===
+let wakeLock = null;
+const requestWakeLock = async () => {
+    if ('wakeLock' in navigator) {
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+        } catch (err) {
+            console.error("Wake Lock hiba:", err);
+        }
+    }
+};
+const releaseWakeLock = async () => {
+    if (wakeLock !== null) {
+        await wakeLock.release();
+        wakeLock = null;
+    }
+};
+// Ha háttérbe kerül az app és visszajön, újra kell kérni a jogot
+document.addEventListener('visibilitychange', () => {
+    if (wakeLock !== null && document.visibilityState === 'visible' && localStorage.getItem('settingWakeLock') === 'true') {
+        requestWakeLock();
+    }
+});
+// App indulásakor is ellenőrizzük
+if (localStorage.getItem('settingWakeLock') === 'true') {
+    requestWakeLock();
+}
+
+// === FRISSÍTETT HAPTIKUS VISSZAJELZÉS ===
 const haptic = (type = 'light') => {
+    // Ha a felhasználó kikapcsolta a rezgést, kilépünk
+    if (localStorage.getItem('settingHaptic') === 'false') return; 
+    
     if (!("vibrate" in navigator)) return;
     try {
         if (type === 'light') navigator.vibrate(30);
@@ -88,7 +120,7 @@ const updateGenSelect = () => {
         filtered.map(ic => `<option value="${ic.code}">${formatIC(ic.code)}</option>`).join('') : '<option>Nincs adat</option>';
 };
 
-// === PROFIL ÉS HAMBURGER MENÜ LOGIKA (Műszak nélkül) ===
+// === PROFIL, MENÜ ÉS BEÁLLÍTÁSOK LOGIKA ===
 window.toggleSideMenu = () => {
     haptic('light');
     const menu = document.getElementById('sideMenu');
@@ -99,7 +131,6 @@ window.toggleSideMenu = () => {
     const isOpen = menu.classList.contains('open');
     
     if (isOpen) {
-        // Zárás blokkolása, ha nincs kitöltve a név
         if (!localStorage.getItem('userName')) {
             haptic('error');
             return showToast("Kérlek, add meg a neved a folytatáshoz!");
@@ -108,11 +139,14 @@ window.toggleSideMenu = () => {
         overlay.classList.remove('open');
         btn.classList.remove('open');
     } else {
-        // Nyitás
         menu.classList.add('open');
         overlay.classList.add('open');
         btn.classList.add('open');
+        
+        // Adatok betöltése nyitáskor
         document.getElementById('profileName').value = localStorage.getItem('userName') || '';
+        document.getElementById('settingHaptic').checked = localStorage.getItem('settingHaptic') !== 'false'; // Alapból true
+        document.getElementById('settingWakeLock').checked = localStorage.getItem('settingWakeLock') === 'true';
     }
 };
 
@@ -123,7 +157,6 @@ window.closeSideMenu = () => {
 
 window.saveProfile = () => {
     const name = document.getElementById('profileName').value.trim();
-    
     if (!name) {
         haptic('error');
         return showToast("A név megadása kötelező!");
@@ -131,13 +164,30 @@ window.saveProfile = () => {
     
     localStorage.setItem('userName', name);
     haptic('success');
-    showToast("Profil sikeresen mentve!");
+    showToast("Mentve!");
     
-    // Most már be lehet zárni
     document.getElementById('sideMenu').classList.remove('open');
     document.getElementById('sideOverlay').classList.remove('open');
     document.getElementById('hamburgerBtn').classList.remove('open');
 };
+
+// Eseménykezelők a beállító kapcsolókhoz (Azonnal mentenek)
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('settingHaptic')?.addEventListener('change', (e) => {
+        localStorage.setItem('settingHaptic', e.target.checked);
+        if (e.target.checked) haptic('light'); // Rezzen egyet próbából, ha visszakapcsolja
+    });
+
+    document.getElementById('settingWakeLock')?.addEventListener('change', (e) => {
+        localStorage.setItem('settingWakeLock', e.target.checked);
+        if (e.target.checked) {
+            requestWakeLock();
+            showToast("Kijelző ébrentartása bekapcsolva");
+        } else {
+            releaseWakeLock();
+        }
+    });
+});
 
 // Automatikus ellenőrzés induláskor
 setTimeout(() => {
@@ -152,7 +202,6 @@ setTimeout(() => {
 
 // === GENERÁTOR ===
 window.generateData = async () => {
-    // 1. KÖTELEZŐ PROFIL ELLENŐRZÉS
     if (!localStorage.getItem('userName')) {
         haptic('error');
         showToast("Előbb töltsd ki a profilt!");
@@ -194,7 +243,6 @@ window.generateData = async () => {
     document.getElementById('q1-text').innerHTML = `<strong style="color:#000">${qr1Text}</strong>`;
     document.getElementById('q2-text').innerHTML = `<strong style="color:#000">${formatIC(cleanIC)}${paddedAmount}${r10}</strong>`;
 
-    // 2. FIREBASE MENTÉS (Névvel együtt)
     try {
         await addDoc(collection(db, 'logs'), {
             icCode: code,
@@ -245,25 +293,21 @@ window.loadStats = async () => {
             const data = doc.data();
             if (!data.timestamp) return;
 
-            // Összesített adatok (Mindenkori)
             allCount++;
             if (data.userId) uniqueUsers.add(data.userId);
 
-            // Alapanyag részletező (Mindenkori halmozott)
             if (!allIcsBreakdown[data.icCode]) {
                 allIcsBreakdown[data.icCode] = { count: 0, amount: 0 };
             }
             allIcsBreakdown[data.icCode].count++;
             allIcsBreakdown[data.icCode].amount += (data.amount || 0);
 
-            // Havi adatok
             if (data.timestamp >= firstDayOfMonth) {
                 monthCount++;
                 monthAmount += (data.amount || 0);
                 monthIcs[data.icCode] = (monthIcs[data.icCode] || 0) + 1;
             }
 
-            // Mai adatok
             if (data.timestamp >= today) {
                 dayCount++;
                 dayAmount += (data.amount || 0);
@@ -283,7 +327,6 @@ window.loadStats = async () => {
             return topIc;
         };
 
-        // Kártyák frissítése
         document.getElementById('statDayCount').innerText = dayCount;
         document.getElementById('statDayAmount').innerText = dayAmount.toLocaleString('hu-HU') + ' db';
         document.getElementById('statDayTop').innerText = getTopIc(dayIcs);
@@ -295,7 +338,6 @@ window.loadStats = async () => {
         document.getElementById('statAllCount').innerText = allCount;
         document.getElementById('statAllUsers').innerText = uniqueUsers.size;
 
-        // Alapanyag lista renderelése
         const statIcBreakdownEl = document.getElementById('statIcBreakdown');
         if (statIcBreakdownEl) {
             const sortedIcs = Object.entries(allIcsBreakdown).sort((a, b) => b[1].count - a[1].count);
@@ -422,14 +464,12 @@ function showUpdateButton(worker) {
     haptic('success');
     const updateBtn = document.getElementById('updateBadgeBtn');
     if (updateBtn) {
-        updateBtn.classList.remove('hidden'); // Pulzáló gomb megjelenítése
-        
+        updateBtn.classList.remove('hidden');
         updateBtn.addEventListener('click', () => {
             haptic('light');
             updateBtn.innerText = 'Töltés...';
-            updateBtn.style.animation = 'none'; // Animáció leállítása kattintáskor
+            updateBtn.style.animation = 'none';
             worker.postMessage({ type: 'SKIP_WAITING' });
         });
     }
 }
-
