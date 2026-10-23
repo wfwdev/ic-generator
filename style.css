@@ -298,3 +298,17 @@ body.dark-mode .navbar-title {
     animation: pulseUpdate 2s infinite;
     display: inline-block !important;
 }
+
+/* ==========================================================================
+   Kapcsolók (Beállítások) dizájn
+   ========================================================================== */
+.form-check-input:checked {
+    background-color: #9d29b2 !important;
+    border-color: #9d29b2 !important;
+}
+.form-switch .form-check-input {
+    cursor: pointer;
+    width: 2.5em !important;
+    height: 1.25em !important;
+}
+
