@@ -288,3 +288,13 @@ body.dark-mode .navbar-title {
     transition: all 0.3s ease; 
 }
 .side-overlay.open { opacity: 1; visibility: visible; }
+
+@keyframes pulseUpdate {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(255, 193, 7, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+#updateBadgeBtn:not(.hidden) {
+    animation: pulseUpdate 2s infinite;
+    display: inline-block !important;
+}
