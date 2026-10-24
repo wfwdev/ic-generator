@@ -38,7 +38,7 @@ body {
 
 .navbar-title { 
     font-weight: 700; 
-    font-size: 1.4rem; /* Nagyobb lett a betűméret! */
+    font-size: 1.4rem; 
     color: #fff; 
     letter-spacing: 0.5px;
 }
@@ -96,11 +96,8 @@ body {
 .pill-nav button.active { background: var(--sur); color: var(--tx); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
 /* ==========================================================================
-   Generátor Eredmény & Listák & Infó
+   Listák & Infó (Statisztika és Admin kiegészítők)
    ========================================================================== */
-.qr-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-.qr-item { text-align: center; padding: 20px; background: var(--sur2); border-radius: 12px; }
-.qr-item canvas, .qr-item img { margin: 0 auto; max-width: 160px; }
 .qr-label { font-family: monospace; font-size: 0.85rem; color: var(--tx); margin-top: 15px; }
 
 .list-group-item { background: transparent; border-color: var(--bord); color: var(--tx); padding: 16px 0; }
@@ -172,87 +169,9 @@ body {
     border-top: 1px solid var(--bord);
     padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
-/* ==========================================================================
-   SÖTÉT MÓD SZÖVEG OLVASHATÓSÁG JAVÍTÁS (Bootstrap felülírások)
-   ========================================================================== */
-body.dark-mode .text-dark { 
-    color: #ffffff !important; 
-}
-
-body.dark-mode .text-muted { 
-    color: #a0a0a0 !important; 
-}
-
-body.dark-mode .form-control, 
-body.dark-mode .form-select {
-    color: #ffffff !important;
-    background-color: var(--sur2) !important;
-    border-color: var(--bord) !important;
-}
-
-body.dark-mode .form-control::placeholder { 
-    color: #888888 !important; 
-}
-
-body.dark-mode h4, 
-body.dark-mode h5, 
-body.dark-mode h6 { 
-    color: #ffffff !important; 
-}
-
-body.dark-mode .list-group-item { 
-    color: #ffffff !important; 
-}
-
-/* Kiemelés doboz szövege sötétben */
-body.dark-mode .info-block.highlight p.text-muted {
-    color: #d1d5db !important;
-}
-
-body.dark-mode .navbar-title {
-    color: #ffffff !important;
-}
 
 /* ==========================================================================
-   PWA Frissítés Banner
-   ========================================================================== */
-.update-banner {
-    position: fixed;
-    bottom: 85px; /* Pont az alsó menü felett jelenik meg */
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--brand-grad);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 100px;
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-    z-index: 9999;
-    font-weight: 700;
-    font-size: 0.9rem;
-    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    white-space: nowrap;
-}
-
-.update-banner button {
-    background: white;
-    color: #9d29b2;
-    border: none;
-    border-radius: 50px;
-    padding: 6px 14px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.update-banner button:active {
-    transform: scale(0.95);
-}
-
-/* ==========================================================================
-   Hamburger Menü & Oldalsó Profil (ÚJ)
+   Hamburger Menü & Oldalsó Profil
    ========================================================================== */
 .hamburger-btn { 
     width: 40px; height: 40px; 
@@ -289,18 +208,8 @@ body.dark-mode .navbar-title {
 }
 .side-overlay.open { opacity: 1; visibility: visible; }
 
-@keyframes pulseUpdate {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
-    70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(255, 193, 7, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
-}
-#updateBadgeBtn:not(.hidden) {
-    animation: pulseUpdate 2s infinite;
-    display: inline-block !important;
-}
-
 /* ==========================================================================
-   Kapcsolók (Beállítások) dizájn
+   Beállítások Kapcsolók (Toggles)
    ========================================================================== */
 .form-check-input:checked {
     background-color: #9d29b2 !important;
@@ -313,7 +222,7 @@ body.dark-mode .navbar-title {
 }
 
 /* ==========================================================================
-   Vizuális villanás (Képernyő keret)
+   Vizuális Visszajelzés (Képernyő Keret Villanás)
    ========================================================================== */
 #flashOverlay {
     position: fixed; inset: 0;
@@ -326,4 +235,34 @@ body.dark-mode .navbar-title {
 .flash-active-error { opacity: 1 !important; box-shadow: inset 0 0 40px 15px rgba(220, 53, 69, 0.7) !important; transition: none !important; }
 .flash-active-light { opacity: 1 !important; box-shadow: inset 0 0 20px 5px rgba(157, 41, 178, 0.4) !important; transition: none !important; }
 
+/* ==========================================================================
+   PWA Frissítés Jelző (Pulzáló Gomb)
+   ========================================================================== */
+@keyframes pulseUpdate {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(255, 193, 7, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+#updateBadgeBtn:not(.hidden) {
+    animation: pulseUpdate 2s infinite;
+    display: inline-block !important;
+}
 
+/* ==========================================================================
+   SÖTÉT MÓD SZÖVEG OLVASHATÓSÁG JAVÍTÁS (Bootstrap felülírások)
+   ========================================================================== */
+body.dark-mode .text-dark { color: #ffffff !important; }
+body.dark-mode .text-muted { color: #a0a0a0 !important; }
+
+body.dark-mode .form-control, 
+body.dark-mode .form-select {
+    color: #ffffff !important;
+    background-color: var(--sur2) !important;
+    border-color: var(--bord) !important;
+}
+
+body.dark-mode .form-control::placeholder { color: #888888 !important; }
+body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 { color: #ffffff !important; }
+body.dark-mode .list-group-item { color: #ffffff !important; }
+body.dark-mode .info-block.highlight p.text-muted { color: #d1d5db !important; }
+body.dark-mode .navbar-title { color: #ffffff !important; }
