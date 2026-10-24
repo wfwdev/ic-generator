@@ -191,14 +191,16 @@ body {
 .side-menu { 
     position: fixed; top: 0; left: -300px; 
     width: 280px; 
-    height: 100dvh; /* A 'dvh' tökéletesen leköveti a Safari alsó menüjének mozgását! */
+    height: 100dvh; 
     background: var(--sur); z-index: 2050; 
     transition: left 0.3s ease; 
-    padding: 85px 20px 20px; 
+    padding: 85px 20px 40px; 
     box-shadow: 2px 0 15px rgba(0,0,0,0.15); 
-    display: flex; flex-direction: column;
+    display: block; /* Ez volt a kulcs! A flexbox okozta az iOS fagyást */
     overflow-y: auto; 
+    -webkit-overflow-scrolling: touch;
 }
+
 
 
 .side-menu.open { left: 0; }
