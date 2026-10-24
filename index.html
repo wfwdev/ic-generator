@@ -27,13 +27,18 @@
         
                 <div class="navbar-title text-white fw-bold">IC Generator</div>
         
-        <!-- ÚJ FRISSÍTÉS GOMB (ALAPÉRTELMEZETTEN REJTETT) -->
+                <!-- ÚJ FRISSÍTÉS GOMB (ALAPÉRTELMEZETTEN REJTETT) -->
         <div class="d-flex align-items-center gap-2">
             <button id="updateBadgeBtn" class="btn btn-sm hidden" style="font-size: 0.75rem; border-radius: 20px; font-weight: bold; background: #ffc107; color: #000; border: none; z-index: 9999;">
                 🔄 Frissítés
             </button>
+            
+            <!-- ÚJ: ÜNNEPI GOMB (Alapból rejtett) -->
+            <button id="xmasBtn" class="nav-btn border-0 bg-transparent hidden">🎁</button>
+            
             <button id="themeToggle" class="nav-btn border-0 bg-transparent">🌙</button>
         </div>
+
 </div>
 </nav>
 
@@ -278,6 +283,19 @@
 </div>
 <!-- PROFIL MENÜ VÉGE -->
 
+<!-- ÚJ: ADVENTI NAPTÁR MODÁL -->
+<div class="overlay" id="adventModal">
+    <div class="modal-custom" style="max-height: 85vh; display: flex; flex-direction: column;">
+        <h4 class="fw-bold mb-1 text-primary">🎄 Adventi Naptár</h4>
+        <p class="small text-muted mb-0">Minden nap egy kis apróság a műszakhoz!</p>
+        
+        <div id="adventGrid" class="advent-grid" style="overflow-y: auto; padding: 5px; margin-bottom: 15px;">
+            <!-- Ide generálja a JS a 24 napot -->
+        </div>
+        
+        <button class="btn btn-light w-100 mt-auto" onclick="closeModal('adventModal')">Bezárás</button>
+    </div>
+</div>
 
 
 
