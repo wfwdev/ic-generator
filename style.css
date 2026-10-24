@@ -190,13 +190,17 @@ body {
 
 .side-menu { 
     position: fixed; top: 0; left: -300px; 
-    width: 280px; height: 100vh; 
+    width: 280px; 
+    height: 100%; /* 100vh helyett 100%, így a Safari alsó sávja nem takar be */
     background: var(--sur); z-index: 2050; 
     transition: left 0.3s ease; 
-    padding: 85px 20px 20px; /* A 85px a navbar miatt kell */
+    padding: 85px 20px 20px; 
     box-shadow: 2px 0 15px rgba(0,0,0,0.15); 
     display: flex; flex-direction: column;
+    overflow-y: auto; /* <-- EZ HIÁNYZOTT: Engedélyezi a függőleges görgetést */
+    -webkit-overflow-scrolling: touch; /* Sima, lendületes görgetés iOS-en */
 }
+
 .side-menu.open { left: 0; }
 
 .side-overlay { 
