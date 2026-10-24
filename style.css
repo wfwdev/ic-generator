@@ -266,3 +266,48 @@ body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 { color: #ffffff !import
 body.dark-mode .list-group-item { color: #ffffff !important; }
 body.dark-mode .info-block.highlight p.text-muted { color: #d1d5db !important; }
 body.dark-mode .navbar-title { color: #ffffff !important; }
+
+/* ==========================================================================
+   Ünnepi Easter Egg és Adventi Naptár
+   ========================================================================== */
+.advent-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+.advent-day {
+    background: var(--sur2);
+    border: 1px solid var(--bord);
+    border-radius: 8px;
+    padding: 15px 0;
+    text-align: center;
+    font-weight: 900;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.2s;
+    color: var(--tx);
+}
+.advent-day.locked {
+    opacity: 0.4;
+}
+.advent-day.opened {
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.4);
+}
+.snowflake {
+    position: fixed;
+    top: -10px;
+    color: var(--tx);
+    opacity: 0.2; /* Nagyon halvány, hogy ne zavarja a munkát */
+    font-size: 1rem;
+    user-select: none;
+    z-index: 1000;
+    pointer-events: none; /* Át lehet rajta kattintani */
+    animation: fall linear forwards;
+}
+@keyframes fall {
+    to { transform: translateY(100vh) rotate(360deg); }
+}
