@@ -134,12 +134,21 @@ body.dark-mode .info-block.highlight p.text-muted { color: #d1d5db !important; }
 .side-overlay.open { opacity: 1; visibility: visible; }
 
 .side-menu { 
-    position: fixed; top: 0; left: -300px; width: 280px; height: 100dvh; 
-    background: var(--sur); z-index: 2050; transition: left 0.3s ease; 
-    padding: 85px 20px 20px; box-shadow: 2px 0 15px rgba(0,0,0,0.15); 
-    display: flex; flex-direction: column; 
-    /* Itt NINCS scroll, hogy az iOS ne fagyjon le! */
+    position: fixed; 
+    top: 0; 
+    bottom: 0; /* A 100vh helyett fixen az aljára horgonyozzuk */
+    left: -300px; 
+    width: 280px; 
+    background: var(--sur); 
+    z-index: 2050; 
+    transition: left 0.3s ease; 
+    padding: 85px 20px 20px; 
+    box-shadow: 2px 0 15px rgba(0,0,0,0.15); 
+    display: block; /* Flexbox kikapcsolva, ez okozta a Safari fagyását */
+    overflow-y: auto; /* Görgetés bekapcsolása */
+    -webkit-overflow-scrolling: touch; /* Sima görgetés iOS-en */
 }
+
 .side-menu.open { left: 0; }
 
 /* A kapcsolók dizájnja */
