@@ -312,3 +312,18 @@ body.dark-mode .navbar-title {
     height: 1.25em !important;
 }
 
+/* ==========================================================================
+   Vizuális villanás (Képernyő keret)
+   ========================================================================== */
+#flashOverlay {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.4s ease-out; /* Sima elhalványulás */
+    box-shadow: inset 0 0 0 0 transparent;
+}
+.flash-active-success { opacity: 1 !important; box-shadow: inset 0 0 40px 15px rgba(40, 167, 69, 0.7) !important; transition: none !important; }
+.flash-active-error { opacity: 1 !important; box-shadow: inset 0 0 40px 15px rgba(220, 53, 69, 0.7) !important; transition: none !important; }
+.flash-active-light { opacity: 1 !important; box-shadow: inset 0 0 20px 5px rgba(157, 41, 178, 0.4) !important; transition: none !important; }
+
+
