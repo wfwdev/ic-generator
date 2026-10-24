@@ -228,7 +228,7 @@ body {
     position: fixed; inset: 0;
     pointer-events: none; z-index: 9999;
     opacity: 0;
-    transition: opacity 0.4s ease-out; /* Sima elhalványulás */
+    transition: opacity 0.8s ease-out; /* Sima elhalványulás */
     box-shadow: inset 0 0 0 0 transparent;
 }
 .flash-active-success { opacity: 1 !important; box-shadow: inset 0 0 40px 15px rgba(40, 167, 69, 0.7) !important; transition: none !important; }
