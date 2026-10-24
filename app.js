@@ -390,8 +390,8 @@ const initXmasFeatures = () => {
     //const date = d.getDate();
 
     // IDŐGÉP A TESZTELÉSHEZ (Vedd ki a // jelet a használni kívánt sor elől):
-    const month = 10; const date = 16; // Teszt: November 16. (Teaser megjelenik)
-   // const month = 11; const date = 5;  // Teszt: December 5. (Naptár, hóesés és 5 ablak nyitható)
+    //const month = 10; const date = 16; // Teszt: November 16. (Teaser megjelenik)
+    const month = 11; const date = 5;  // Teszt: December 5. (Naptár, hóesés és 5 ablak nyitható)
 
     const xmasBtn = document.getElementById('xmasBtn');
     if (!xmasBtn) return;
