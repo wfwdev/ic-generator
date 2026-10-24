@@ -352,3 +352,131 @@ function showUpdateButton(worker) {
         });
     }
 }
+
+// === ÜNNEPI MEGLEPETÉS (ADVENT & EASTER EGG) ===
+const xmasMessages = [
+    "Első nap! Igyál egy jó kávét a gépből, megérdemled! ☕",
+    "Kitartás, közeleg a hétvége! 🚀",
+    "Mai kihívás: Dicsérd meg az egyik kollégádat! 🤝",
+    "Generálj ma hibátlanul! 😎",
+    "Jön a Mikulás! Pucold ki a bakancsot! 🎅",
+    "Boldog Mikulást! Kérj egy szaloncukrot a műszakvezetőtől! 🍬",
+    "Már egy hete nyitogatod az ablakokat! Szép munka! 🏭",
+    "Csak lazán, ma senki sem hajt a tatár! 🧘",
+    "Figyelted már, milyen szépen hullik a hó az appban? ❄️",
+    "Mai bónusz: Veregesd vállon magad egy jó IC beolvasás után! 👏",
+    "Félidő! Rohamosan közeleg a Karácsony! 🎄",
+    "Lassan érdemes elgondolkodni az ajándékokon... 🎁",
+    "Igyál egy pohár vizet, fontos a hidratálás! 💧",
+    "Ma minden vonalkód elsőre zöld lesz. (Reméljük!) 🟢",
+    "Tudtad? Az IC generátor is várja már az ünnepeket! 🤖",
+    "Lassan itt a pihenés ideje. Tarts ki! 🔋",
+    "Egy mosoly sokat segít a műszak végén. Próbáld ki! 😁",
+    "Már csak egy hét Szentestéig! ⏳",
+    "Hajrá! Mindenki számít a munkádra! 💪",
+    "Érzed már a bejgli illatát? 🥐",
+    "Ma este nézz meg egy jó filmet otthon! 🎬",
+    "Mindjárt itt az ünnep! Utolsó hajrá! 🏎️",
+    "Holnap Karácsony! Ma már csak óvatosan a raklapokkal! ⚠️",
+    "🎄 BOLDOG KARÁCSONYT KÍVÁN AZ IC GENERATOR! 🎄 Pihenj sokat!"
+];
+
+const initXmasFeatures = () => {
+    const d = new Date();
+    const month = d.getMonth(); // 10 = Nov, 11 = Dec
+    const date = d.getDate();
+    
+    const xmasBtn = document.getElementById('xmasBtn');
+    if (!xmasBtn) return;
+
+    if (month === 10) {
+        // NOVEMBER: TEASER
+        xmasBtn.classList.remove('hidden');
+        xmasBtn.addEventListener('click', () => {
+            playFeedback('error'); // Kis pittyenés
+            showToast("🎁 Türelem! Valami különleges meglepetés készül decemberre... Figyeld az appot!");
+        });
+    } 
+    else if (month === 11 && date <= 31) {
+        // DECEMBER: ÉLES
+        xmasBtn.classList.remove('hidden');
+        
+        // 1. Téli Easter Egg gombok
+        const themeBtn = document.getElementById('themeToggle');
+        if (themeBtn) {
+            const isDark = document.body.classList.contains('dark-mode');
+            themeBtn.textContent = isDark ? '⛄' : '❄️';
+            // Felülírjuk az eredeti klikket
+            themeBtn.addEventListener('click', () => {
+                setTimeout(() => {
+                    const newIsDark = document.body.classList.contains('dark-mode');
+                    themeBtn.textContent = newIsDark ? '⛄' : '❄️';
+                }, 50);
+            });
+        }
+
+        // 2. Diszkrét hóesés indítása
+        setInterval(() => {
+            const flake = document.createElement('div');
+            flake.classList.add('snowflake');
+            flake.style.left = Math.random() * 100 + 'vw';
+            flake.style.animationDuration = Math.random() * 3 + 5 + 's'; // 5-8 mp alatt esik le
+            flake.innerHTML = '❄️';
+            document.body.appendChild(flake);
+            setTimeout(() => flake.remove(), 8000); // Törlés a memóriából
+        }, 1500); // 1.5 másodpercenként 1 hópehely (nagyon hardverbarát)
+
+        // 3. Adventi Naptár nyitás
+        xmasBtn.addEventListener('click', () => {
+            playFeedback('light');
+            renderAdvent(date);
+            document.getElementById('adventModal').classList.add('open');
+        });
+    }
+};
+
+const renderAdvent = (currentDay) => {
+    const grid = document.getElementById('adventGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    
+    // Elmentett nyitások betöltése
+    const openedDays = JSON.parse(localStorage.getItem('adventOpened') || '[]');
+
+    for (let i = 1; i <= 24; i++) {
+        const box = document.createElement('div');
+        box.classList.add('advent-day');
+        box.textContent = i;
+        
+        if (i > currentDay) {
+            box.classList.add('locked');
+            box.onclick = () => {
+                playFeedback('error');
+                showToast("Ezt még nem nyithatod ki! 🛑");
+            };
+        } else if (openedDays.includes(i)) {
+            box.classList.add('opened');
+            box.innerHTML = '🎁';
+            box.onclick = () => {
+                playFeedback('success');
+                alert(`🎄 ${i}. Nap:\n\n${xmasMessages[i-1]}`);
+            };
+        } else {
+            box.onclick = () => {
+                playFeedback('success');
+                box.classList.add('opened');
+                box.innerHTML = '🎁';
+                openedDays.push(i);
+                localStorage.setItem('adventOpened', JSON.stringify(openedDays));
+                
+                // Beépített böngészős alert, hogy jól olvasható legyen a szöveg
+                alert(`🎄 ${i}. Nap:\n\n${xmasMessages[i-1]}`);
+            };
+        }
+        grid.appendChild(box);
+    }
+};
+
+// Ünnepi mód indítása, amint betölt a DOM
+document.addEventListener('DOMContentLoaded', initXmasFeatures);
+
