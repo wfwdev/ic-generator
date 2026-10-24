@@ -197,7 +197,23 @@ body.dark-mode .info-block.highlight p.text-muted { color: #d1d5db !important; }
 .advent-day.opened { background: #28a745; color: white; border-color: #28a745; box-shadow: 0 0 10px rgba(40, 167, 69, 0.4); }
 
 .snowflake {
-    position: fixed; top: -10px; color: var(--tx); opacity: 0.2; font-size: 1rem;
-    user-select: none; z-index: 1000; pointer-events: none; animation: fall linear forwards;
+    position: fixed; 
+    top: -10px; 
+    color: #94a3b8; /* Finom jeges-kékesszürke szín világos módhoz */
+    opacity: 0.6; /* Erősebb láthatóság */
+    font-size: 1.2rem; /* Kicsit nagyobb méret, hogy jobban kivehető legyen */
+    user-select: none; 
+    z-index: 1000; 
+    pointer-events: none; 
+    animation: fall linear forwards;
 }
-@keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
+
+/* Külön szabály sötét módra */
+body.dark-mode .snowflake {
+    color: #ffffff; /* Sötét módban tiszta fehér */
+    opacity: 0.3; /* A sötét háttéren elég a kisebb átlátszóság is */
+}
+
+@keyframes fall { 
+    to { transform: translateY(100vh) rotate(360deg); } 
+}
