@@ -382,31 +382,47 @@ const xmasMessages = [
 ];
 
 const initXmasFeatures = () => {
+    // --- 1. DÁTUM BEKÉRÉSE ---
     const d = new Date();
-    const month = d.getMonth(); // 10 = Nov, 11 = Dec
-    const date = d.getDate();
     
+    // ÉLES VÁLTOZAT (Ezt használd, amikor kész vagy a teszttel!)
+    const month = d.getMonth(); 
+    const date = d.getDate();
+
+    // IDŐGÉP A TESZTELÉSHEZ (Vedd ki a // jelet a használni kívánt sor elől):
+    // const month = 10; const date = 16; // Teszt: November 16. (Teaser megjelenik)
+    // const month = 11; const date = 5;  // Teszt: December 5. (Naptár, hóesés és 5 ablak nyitható)
+
     const xmasBtn = document.getElementById('xmasBtn');
     if (!xmasBtn) return;
 
-    if (month === 10) {
-        // NOVEMBER: TEASER
+    // --- 2. LOGIKA ---
+    if (month === 10 && date >= 15) {
+        // NOVEMBER 15-TŐL: TEASER
         xmasBtn.classList.remove('hidden');
-        xmasBtn.addEventListener('click', () => {
-            playFeedback('error'); // Kis pittyenés
+        
+        // Fontos: Ha a gombnak már volt eseménykezelője, azt cseréljük (hogy tesztelésnél ne duplázzon)
+        const newBtn = xmasBtn.cloneNode(true);
+        xmasBtn.parentNode.replaceChild(newBtn, xmasBtn);
+        
+        newBtn.addEventListener('click', () => {
+            playFeedback('error');
             showToast("🎁 Türelem! Valami különleges meglepetés készül decemberre... Figyeld az appot!");
         });
     } 
     else if (month === 11 && date <= 31) {
-        // DECEMBER: ÉLES
+        // DECEMBER: ÉLES ÜNNEPI MÓD
         xmasBtn.classList.remove('hidden');
         
+        // Eseménykezelők tisztítása (klónozással)
+        const newBtn = xmasBtn.cloneNode(true);
+        xmasBtn.parentNode.replaceChild(newBtn, xmasBtn);
+
         // 1. Téli Easter Egg gombok
         const themeBtn = document.getElementById('themeToggle');
         if (themeBtn) {
             const isDark = document.body.classList.contains('dark-mode');
             themeBtn.textContent = isDark ? '⛄' : '❄️';
-            // Felülírjuk az eredeti klikket
             themeBtn.addEventListener('click', () => {
                 setTimeout(() => {
                     const newIsDark = document.body.classList.contains('dark-mode');
@@ -420,14 +436,14 @@ const initXmasFeatures = () => {
             const flake = document.createElement('div');
             flake.classList.add('snowflake');
             flake.style.left = Math.random() * 100 + 'vw';
-            flake.style.animationDuration = Math.random() * 3 + 5 + 's'; // 5-8 mp alatt esik le
+            flake.style.animationDuration = Math.random() * 3 + 5 + 's'; 
             flake.innerHTML = '❄️';
             document.body.appendChild(flake);
-            setTimeout(() => flake.remove(), 8000); // Törlés a memóriából
-        }, 1500); // 1.5 másodpercenként 1 hópehely (nagyon hardverbarát)
+            setTimeout(() => flake.remove(), 8000); 
+        }, 1500); 
 
         // 3. Adventi Naptár nyitás
-        xmasBtn.addEventListener('click', () => {
+        newBtn.addEventListener('click', () => {
             playFeedback('light');
             renderAdvent(date);
             document.getElementById('adventModal').classList.add('open');
