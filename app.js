@@ -19,6 +19,35 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 enableIndexedDbPersistence(db).catch(() => console.warn("Offline mód korlátozott"));
 
+// === JOGOSULTSÁG KEZELÉS (RBAC) ===
+window.currentUser = {
+    id: localStorage.getItem('anon_user_id'),
+    name: localStorage.getItem('userName'),
+    role: localStorage.getItem('userRole') || 'operator' // Alapértelmezett kategória
+};
+
+const PAGE_PERMISSIONS = {
+    'index.html': ['operator', 'leader', 'admin'],
+    '': ['operator', 'leader', 'admin'], // Ha nincs fájlnév az URL-ben (gyökér)
+    'ic-generator.html': ['operator', 'leader', 'admin'],
+    'mes-terminal.html': ['leader', 'admin'], // Csak magasabb szinteknek
+    'admin.html': ['admin'] // Szigorúan csak neked
+};
+
+const checkPageAccess = () => {
+    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+    const allowedRoles = PAGE_PERMISSIONS[currentPath];
+    
+    if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
+        alert("🔒 Nincs jogosultságod ennek az oldalnak a megtekintéséhez!");
+        window.location.replace('index.html');
+    }
+};
+
+// Azonnali ellenőrzés
+checkPageAccess();
+
+
 // === KÉPERNYŐ ÉBRENTARTÁS ===
 let wakeLock = null;
 const requestWakeLock = async () => {
