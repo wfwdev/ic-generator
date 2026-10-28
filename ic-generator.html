@@ -13,69 +13,125 @@
 </head>
 <body>
 
+<!-- IDEIGLENESEN ITT A NAVBAR (A következő lépésben ezt kiszervezzük egy külön fájlba!) -->
 <div id="flashOverlay"></div>
-
 <nav class="navbar fixed-top">
-    <div class="container-fluid d-flex justify-content-start align-items-center">
-        <button class="btn text-white p-0 me-3" style="font-size: 1.2rem;" onclick="window.location.href='index.html'">←</button>
-        <div class="navbar-title text-white fw-bold">IC Generator</div>
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <!-- Vissza a kezdőlapra gomb a Hamburger helyett -->
+            <button class="btn text-white p-0 me-3" style="font-size: 1.5rem; line-height: 1;" onclick="window.location.href='index.html'">←</button>
+            <div class="navbar-title text-white fw-bold">IC Generator</div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-2">
+            <button id="updateBadgeBtn" class="btn btn-sm hidden" style="font-size: 0.75rem; border-radius: 20px; font-weight: bold; background: #ffc107; color: #000; border: none; z-index: 9999;">🔄 Frissítés</button>
+            <button id="xmasBtn" class="nav-btn border-0 bg-transparent hidden">🎁</button>
+            <button id="themeToggle" class="nav-btn border-0 bg-transparent">🌙</button>
+        </div>
     </div>
 </nav>
 
 <main class="container" style="padding-top: 80px; padding-bottom: 80px;">
-    <div class="minimal-card">
-        <div class="pill-nav mb-4">
-            <button class="active" onclick="switchType('ESS')">ESS</button>
-            <button onclick="switchType('WSS')">WSS</button>
+    
+    <!-- 1. GENERÁTOR FÜL -->
+    <div id="tab-generator">
+        <div class="minimal-card">
+            <div class="pill-nav mb-4">
+                <button class="active" onclick="switchType('ESS')">ESS</button>
+                <button onclick="switchType('WSS')">WSS</button>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-bold">IC kiválasztása</label>
+                <select id="genSelect" class="form-select form-select-lg"></select>
+            </div>
+            <div class="mb-4">
+                <label class="form-label small fw-bold">Mennyiség (Max 5000)</label>
+                <input type="number" id="genAmount" class="form-control form-control-lg" placeholder="Pl. 1500" inputmode="numeric" pattern="[0-9]*" min="1" max="5000">
+            </div>
+            <button class="btn btn-primary btn-lg w-100" onclick="generateData()">Generálás</button>
         </div>
-        
-        <div class="mb-3">
-            <label class="form-label small fw-bold">IC kiválasztása</label>
-            <select id="genSelect" class="form-select form-select-lg"></select>
-        </div>
-        
-        <div class="mb-4">
-            <label class="form-label small fw-bold">Mennyiség (Max 5000)</label>
-            <input type="number" id="genAmount" class="form-control form-control-lg" placeholder="Pl. 1500" inputmode="numeric" pattern="[0-9]*" min="1" max="5000">
-        </div>
-        
-        <button class="btn btn-primary btn-lg w-100" onclick="generateData()">Generálás</button>
     </div>
+
+    <!-- 2. ADMIN FÜL (Az eredeti kódod alapján) -->
+    <div id="tab-admin" class="hidden">
+        <div class="minimal-card">
+            <h5 class="fw-bold mb-3">IC Adatbázis</h5>
+            <div id="adminList" class="list-group list-group-flush"></div>
+            <button class="btn btn-outline-primary mt-4 w-100" style="border-style:dashed" onclick="openIcModal()">+ Új IC rögzítése</button>
+        </div>
+    </div>
+
+    <!-- 3. STATISZTIKA FÜL (Az eredeti kódod alapján) -->
+    <div id="tab-stat" class="hidden">
+        <div class="minimal-card">
+            <h5 class="fw-bold mb-4">📊 Műszerfal</h5>
+            <!-- Napi Blokk -->
+            <div class="p-3 mb-4 rounded" style="background: var(--sur2); border: 1px solid var(--bord);">
+                <h6 class="text-primary mb-3 fw-bold d-flex align-items-center gap-2">⚡ Mai aktivitás</h6>
+                <div class="row text-center mb-3">
+                    <div class="col-6 border-end" style="border-color: var(--bord) !important;">
+                        <div class="text-muted small mb-1">Generálások</div>
+                        <strong class="fs-3" id="statDayCount">0</strong>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small mb-1">Készült darab</div>
+                        <strong class="fs-3" id="statDayAmount">0</strong>
+                    </div>
+                </div>
+            </div>
+            <!-- Havi Blokk -->
+            <div class="p-3 mb-4 rounded" style="background: var(--sur2); border: 1px solid var(--bord);">
+                <h6 class="text-primary mb-3 fw-bold d-flex align-items-center gap-2">📅 Ebben a hónapban</h6>
+                <div class="row text-center mb-3">
+                    <div class="col-6 border-end" style="border-color: var(--bord) !important;">
+                        <div class="text-muted small mb-1">Generálások</div>
+                        <strong class="fs-3" id="statMonthCount">0</strong>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small mb-1">Összes darab</div>
+                        <strong class="fs-3" id="statMonthAmount">0</strong>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-outline-primary w-100 mt-4" style="border-style:dashed" onclick="loadStats()">🔄 Adatok frissítése</button>
+        </div>
+    </div>
+
 </main>
 
-<!-- TELJES KÉPERNYŐS QR NÉZET -->
+<!-- IC SZERKESZTŐ MODÁL -->
+<div class="overlay" id="icModal">
+    <div class="modal-custom">
+        <h4 id="imTitle" class="fw-bold mb-4">IC Kezelés</h4>
+        <div class="mb-3"><label class="form-label">Terület</label><select id="imType" class="form-select"><option value="ESS">ESS</option><option value="WSS">WSS</option></select></div>
+        <div class="mb-4"><label class="form-label">IC Száma</label><input type="text" id="imCode" class="form-control" style="text-transform: uppercase;"></div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-danger" id="imDel" onclick="deleteIc()" style="display:none">Törlés</button>
+            <button class="btn btn-light flex-grow-1" onclick="closeModal('icModal')">Mégsem</button>
+            <button class="btn btn-primary flex-grow-1" onclick="saveIc()">Mentés</button>
+        </div>
+    </div>
+</div>
+
+<!-- TELJES KÉPERNYŐS QR -->
 <div class="qr-fullscreen hidden" id="qrFullscreen">
     <div class="qr-scroll-area">
-        <div class="qr-large-box">
-            <div id="q1-large"></div>
-            <div class="qr-label mt-3 fs-6" id="q1-text"></div>
-        </div>
-        <div class="qr-large-box">
-            <div id="q2-large"></div>
-            <div class="qr-label mt-3 fs-6" id="q2-text"></div>
-        </div>
+        <div class="qr-large-box"><div id="q1-large"></div><div class="qr-label mt-3 fs-6" id="q1-text"></div></div>
+        <div class="qr-large-box"><div id="q2-large"></div><div class="qr-label mt-3 fs-6" id="q2-text"></div></div>
     </div>
-    <div class="qr-footer">
-        <button class="btn btn-primary w-100 btn-lg" onclick="closeQr()">Bezárás</button>
-    </div>
+    <div class="qr-footer"><button class="btn btn-primary w-100 btn-lg" onclick="closeQr()">Bezárás</button></div>
 </div>
 
-<!-- ALSÓ MENÜ (Az IC Generátor saját menüje) -->
+<!-- ALSÓ MENÜ (Az eredeti showTab logikával váltogatja a fenti füleket!) -->
 <nav class="bottom-nav">
     <button onclick="window.location.href='index.html'"><span class="nav-ico">🏠</span>Kezdőlap</button>
-    <button class="active" onclick="window.location.href='ic-generator.html'"><span class="nav-ico">⚡</span>Gen</button>
-    <button onclick="checkAndGo('admin.html')"><span class="nav-ico">🗂️</span>Admin</button>
-    <button onclick="checkAndGo('stat.html')"><span class="nav-ico">📊</span>Stat</button>
+    <button class="active" onclick="showTab('generator')"><span class="nav-ico">⚡</span>Gen</button>
+    <button onclick="showTab('admin')"><span class="nav-ico">🗂️</span>Admin</button>
+    <button onclick="showTab('stat')"><span class="nav-ico">📊</span>Stat</button>
 </nav>
 
-<div class="toast-container">
-    <div id="liveToast" class="toast align-items-center text-white bg-dark border-0" role="alert">
-        <div class="d-flex">
-            <div class="toast-body" id="toastMsg"></div>
-        </div>
-    </div>
-</div>
-
+<!-- TOASTS & SCRIPTS -->
+<div class="toast-container"><div id="liveToast" class="toast align-items-center text-white bg-dark border-0" role="alert"><div class="d-flex"><div class="toast-body" id="toastMsg"></div></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module" src="app.js"></script>
 </body>
