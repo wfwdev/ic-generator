@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Műszak App (Kezdőlap)</title>
+    <title>Műszak App</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff5f00">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" href="/ic-generator/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
     
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,76 +18,140 @@
 
 <div id="flashOverlay"></div>
 
+<!-- FELSŐ SÁV -->
 <nav class="navbar fixed-top">
     <div class="container-fluid d-flex justify-content-between align-items-center">
         <button id="hamburgerBtn" class="hamburger-btn" onclick="toggleSideMenu()">
             <span></span><span></span><span></span>
         </button>
+        
         <div class="navbar-title text-white fw-bold">Műszak App</div>
+        
         <div class="d-flex align-items-center gap-2">
-            <button id="updateBadgeBtn" class="btn btn-sm hidden" style="font-size: 0.75rem; border-radius: 20px; font-weight: bold; background: #ffc107; color: #000; border: none; z-index: 9999;">🔄 Frissítés</button>
+            <button id="updateBadgeBtn" class="btn btn-sm hidden" style="font-size: 0.75rem; border-radius: 20px; font-weight: bold; background: #ffc107; color: #000; border: none; z-index: 9999;">
+                🔄 Frissítés
+            </button>
             <button id="xmasBtn" class="nav-btn border-0 bg-transparent hidden">🎁</button>
             <button id="themeToggle" class="nav-btn border-0 bg-transparent">🌙</button>
         </div>
     </div>
 </nav>
 
+<!-- FŐTARTALOM: CSEMPE RÁCS -->
 <main class="container" style="padding-top: 80px;">
     <h5 class="fw-bold mb-4">Kezdőlap</h5>
     <div class="dashboard-grid" id="dashboardGrid">
         
-        <!-- IC Generator (Mindenki látja) -->
+        <!-- 1. IC Generator (Mindenki látja, egyből a html-re visz) -->
         <div class="dashboard-tile tile-orange" onclick="window.location.href='ic-generator.html'">
             <div class="tile-icon">⚡</div>
             <div class="tile-title">IC-generator</div>
-            <div class="tile-desc">Nyersanyag azonosítók készítése</div>
+            <div class="tile-desc">Nyersanyag azonosítók</div>
         </div>
         
-        <!-- MES Terminál -->
+        <!-- 2. MES Terminál (Ellenőrzött hozzáférés) -->
         <div class="dashboard-tile tile-blue" onclick="checkAndGo('mes-terminal.html')">
             <div class="tile-icon">💻</div>
             <div class="tile-title">MES terminál</div>
-            <div class="tile-desc">Gyors belépés a gépbe (QR)</div>
+            <div class="tile-desc">Gyors belépés (QR)</div>
         </div>
         
-        <!-- Csomagoló Kód -->
+        <!-- 3. Csomagoló Kód (Ellenőrzött hozzáférés) -->
         <div class="dashboard-tile tile-green" onclick="checkAndGo('pack-code.html')">
             <div class="tile-icon">📦</div>
             <div class="tile-title">Csomagoló kód</div>
-            <div class="tile-desc">Csomagoló azonosítók kezelése</div>
+            <div class="tile-desc">Csomagoló azonosítók</div>
         </div>
         
     </div>
 </main>
 
-<!-- ALSÓ MENÜ -->
+<!-- ALSÓ MENÜ (Kezdőlap gomb eltávolítva) -->
 <nav class="bottom-nav">
-    <button class="active" onclick="window.location.href='index.html'"><span class="nav-ico">🏠</span>Kezdőlap</button>
-    <!-- A többi aloldal fizikai fájlja később elkészülhet (admin.html, stat.html) -->
+    <button onclick="checkAndGo('admin.html')"><span class="nav-ico">🗂️</span>Admin</button>
+    <button onclick="checkAndGo('stat.html')"><span class="nav-ico">📊</span>Stat</button>
+    <button onclick="checkAndGo('info.html')"><span class="nav-ico">ℹ️</span>Infó</button>
 </nav>
 
 <!-- OLDALSÓ PROFIL MENÜ -->
 <div class="side-overlay" id="sideOverlay" onclick="closeSideMenu()"></div>
 <div class="side-menu" id="sideMenu">
-    <!-- HAGYD ITT AZ EREDETI PROFIL MENÜD TARTALMÁT -->
-    <h5 class="fw-bold mb-4 text-primary d-flex align-items-center gap-2"><span style="font-size: 1.5rem;">👤</span> Profil</h5>
-    <div class="mb-4"><input type="text" id="profileName" class="form-control" placeholder="Név"></div>
-    <div class="mt-4 pb-5"><button class="btn btn-primary w-100 btn-lg" onclick="saveProfile()">Mentés & Bezárás</button></div>
+    <h5 class="fw-bold mb-4 text-primary d-flex align-items-center gap-2">
+        <span style="font-size: 1.5rem;">👤</span> Profil adatok
+    </h5>
+    
+    <div class="info-block highlight mb-4">
+        <p style="font-size: 0.8rem; line-height: 1.4;">A generátor használatához kérlek add meg a nevedet. Ezt csak egyszer kell beállítanod az eszközödön.</p>
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label small fw-bold">Név / Azonosító *</label>
+        <input type="text" id="profileName" class="form-control" placeholder="Pl. Kiss János">
+    </div>
+    
+    <hr class="my-3" style="border-color: var(--bord);">
+    
+    <h6 class="text-primary mb-3 fw-bold d-flex align-items-center gap-2">
+        <span style="font-size: 1.2rem;">⚙️</span> Beállítások
+    </h6>
+    
+    <div class="d-flex justify-content-between align-items-center p-2 rounded mb-2" style="background: var(--sur); border: 1px solid var(--bord);">
+        <div>
+            <div class="fw-bold small">Hangjelzés</div>
+            <div class="text-muted" style="font-size: 0.7rem;">Csippanás generáláskor</div>
+        </div>
+        <div class="form-check form-switch fs-5 mb-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="settingAudio">
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center p-2 rounded mb-2" style="background: var(--sur); border: 1px solid var(--bord);">
+        <div>
+            <div class="fw-bold small">Képernyő villanás</div>
+            <div class="text-muted" style="font-size: 0.7rem;">Vizuális effekt a széleken</div>
+        </div>
+        <div class="form-check form-switch fs-5 mb-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="settingFlash">
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center p-2 rounded mb-4" style="background: var(--sur); border: 1px solid var(--bord);">
+        <div>
+            <div class="fw-bold small">Ébrentartás</div>
+            <div class="text-muted" style="font-size: 0.7rem;">Kijelző ne kapcsoljon ki</div>
+        </div>
+        <div class="form-check form-switch fs-5 mb-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="settingWakeLock">
+        </div>
+    </div>
+    
+    <div class="mt-4 pb-5">
+        <button class="btn btn-primary w-100 btn-lg" onclick="saveProfile()">Mentés & Bezárás</button>
+    </div>
 </div>
 
-<div class="toast-container"><div id="liveToast" class="toast align-items-center text-white bg-dark border-0" role="alert"><div class="d-flex"><div class="toast-body" id="toastMsg"></div></div></div></div>
+<!-- TOAST ÉRTESÍTÉSEK -->
+<div class="toast-container">
+    <div id="liveToast" class="toast align-items-center text-white bg-dark border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMsg"></div>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module" src="app.js"></script>
 <script>
-    // Dinamikus kattintás-ellenőrzés a csempéken (ha nincs joga, kap egy alertet, és nem navigál át)
+    // Dinamikus kattintás-ellenőrzés a csempéken és menükön (Közös JS-ből kérjük le a jogokat)
     window.checkAndGo = (url) => {
-        const allowedRoles = PAGE_PERMISSIONS[url];
-        if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
-            alert("Ehhez a modulhoz Csoportvezetői vagy Admin jogosultság szükséges!");
-        } else {
-            window.location.href = url;
+        if (typeof PAGE_PERMISSIONS !== 'undefined' && typeof window.currentUser !== 'undefined') {
+            const allowedRoles = PAGE_PERMISSIONS[url];
+            if (allowedRoles && !allowedRoles.includes(window.currentUser.role)) {
+                alert("Ehhez a modulhoz Csoportvezetői vagy Admin jogosultság szükséges!");
+                return;
+            }
         }
+        window.location.href = url;
     };
 </script>
 </body>
