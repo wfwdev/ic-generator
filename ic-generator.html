@@ -44,6 +44,15 @@
     </div>
 </main>
 
+<!-- ALSÓ MENÜ (Az IC Generátor oldal saját menüje) -->
+<nav class="bottom-nav">
+    <button onclick="window.location.href='index.html'"><span class="nav-ico">🏠</span>Kezdőlap</button>
+    <button class="active" onclick="window.location.href='ic-generator.html'"><span class="nav-ico">⚡</span>Gen</button>
+    <button onclick="checkAndGo('admin.html')"><span class="nav-ico">🗂️</span>Admin</button>
+    <button onclick="checkAndGo('stat.html')"><span class="nav-ico">📊</span>Stat</button>
+</nav>
+
+
 <!-- TELJES KÉPERNYŐS QR NÉZET -->
 <div class="qr-fullscreen hidden" id="qrFullscreen">
     <div class="qr-scroll-area">
