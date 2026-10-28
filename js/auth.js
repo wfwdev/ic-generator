@@ -5,10 +5,13 @@ if (!localStorage.getItem('anon_user_id')) {
     localStorage.setItem('anon_user_id', 'user_' + Math.random().toString(36).substr(2, 9));
 }
 
+// === 1. KŐKEMÉNY BIZTONSÁG: A TE EGYEDI AZONOSÍTÓD ===
+// Ide írd be azt az ID-t, amit az F12 Konzolból kimásoltál! (pl. 'user_a1b2c3d4e')
+const MASTER_ADMIN_ID = 'user_1swx210zk';
+
 let savedRole = localStorage.getItem('userRole');
 if (!savedRole) {
-    const savedName = localStorage.getItem('userName') || '';
-    savedRole = (savedName.toLowerCase().includes('gábor') || savedName.toLowerCase().includes('kovács')) ? 'admin' : 'operator';
+    savedRole = 'operator'; // Alapértelmezetten minden új belépő szigorúan operátor
     localStorage.setItem('userRole', savedRole);
 }
 
@@ -18,6 +21,12 @@ window.currentUser = {
     empId: localStorage.getItem('userEmpId') || '',
     role: savedRole
 };
+
+// Ha az adott eszköz ID-je megegyezik a Mester Admin ID-vel, azonnal felülírja a rangot!
+if (window.currentUser.id === MASTER_ADMIN_ID) {
+    window.currentUser.role = 'admin';
+    localStorage.setItem('userRole', 'admin');
+}
 
 window.PAGE_PERMISSIONS = {
     'index.html': ['operator', 'leader', 'admin'],
@@ -59,6 +68,12 @@ window.saveProfile = async () => {
     window.currentUser.name = name;
     window.currentUser.empId = empId;
 
+    // Mester Admin másodlagos ellenőrzés mentéskor is
+    if (window.currentUser.id === MASTER_ADMIN_ID) {
+        window.currentUser.role = 'admin';
+        localStorage.setItem('userRole', 'admin');
+    }
+
     try {
         await setDoc(doc(db, 'users', window.currentUser.id), {
             name: name,
@@ -73,6 +88,11 @@ window.saveProfile = async () => {
     playFeedback('success'); 
     showToast("Profil elmentve! ✓");
     window.closeSideMenu();
+    
+    // Ha Admin vagy, és a mentés megtörtént, azonnal frissít, hogy mindent elérj
+    if (window.currentUser.id === MASTER_ADMIN_ID) {
+        setTimeout(() => window.location.reload(), 800);
+    }
 };
 
 checkPageAccess();
