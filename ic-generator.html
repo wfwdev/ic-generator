@@ -1,1 +1,62 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IC Generator</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff5f00">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<div id="flashOverlay"></div>
+
+<nav class="navbar fixed-top">
+    <div class="container-fluid d-flex justify-content-start align-items-center">
+        <!-- ÚJ VISSZA GOMB -->
+        <button class="btn text-white p-0 me-3" style="font-size: 1.2rem;" onclick="window.location.href='index.html'">← Vissza</button>
+        <div class="navbar-title text-white fw-bold">IC Generator</div>
+    </div>
+</nav>
+
+<main class="container" style="padding-top: 80px;">
+    <!-- GENERÁTOR FÜL -->
+    <div id="tab-generator">
+        <div class="minimal-card">
+            <div class="pill-nav">
+                <button class="active" onclick="switchType('ESS')">ESS</button>
+                <button onclick="switchType('WSS')">WSS</button>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-bold">IC kiválasztása</label>
+                <select id="genSelect" class="form-select form-select-lg"></select>
+            </div>
+            <div class="mb-4">
+                <label class="form-label small fw-bold">Mennyiség (Max 5000)</label>
+                <input type="number" id="genAmount" class="form-control form-control-lg" placeholder="Pl. 1500" inputmode="numeric">
+            </div>
+            <button class="btn btn-primary btn-lg w-100" onclick="generateData()">Generálás</button>
+        </div>
+    </div>
+</main>
+
+<!-- TELJES KÉPERNYŐS QR NÉZET -->
+<div class="qr-fullscreen hidden" id="qrFullscreen">
+    <div class="qr-scroll-area">
+        <div class="qr-large-box"><div id="q1-large"></div><div class="qr-label mt-3 fs-6" id="q1-text"></div></div>
+        <div class="qr-large-box"><div id="q2-large"></div><div class="qr-label mt-3 fs-6" id="q2-text"></div></div>
+    </div>
+    <div class="qr-footer"><button class="btn btn-primary w-100 btn-lg" onclick="closeQr()">Bezárás</button></div>
+</div>
+
+<div class="toast-container"><div id="liveToast" class="toast align-items-center text-white bg-dark border-0" role="alert"><div class="d-flex"><div class="toast-body" id="toastMsg"></div></div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
 
