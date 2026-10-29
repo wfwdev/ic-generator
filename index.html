@@ -3,38 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Műszak App</title>
+    <title>IC Generator</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff5f00">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="/ic-generator/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+    
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-    <script>if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.body.classList.add('dark-mode');</script>
 
-    <main class="container" style="padding-top: 80px;">
-        <h5 class="fw-bold mb-4">Kezdőlap</h5>
-        <div class="dashboard-grid">
-            <div class="dashboard-tile tile-orange" onclick="window.location.href='ic-generator.html'">
-                <div class="tile-icon">⚡</div><div class="tile-title">IC-generator</div><div class="tile-desc">Nyersanyag azonosítók</div>
+<nav class="navbar fixed-top">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <button id="hamburgerBtn" class="hamburger-btn" onclick="toggleSideMenu()">
+            <span></span><span></span><span></span>
+        </button>
+        
+        <div class="navbar-title text-white fw-bold">IC Generator</div>
+        <button id="themeToggle" class="nav-btn border-0 bg-transparent">🌙</button>
+    </div>
+</nav>
+
+
+<main class="container">
+    <!-- GENERÁTOR FÜL -->
+    <div id="tab-generator">
+        <div class="minimal-card">
+            <div class="pill-nav">
+                <button class="active" onclick="switchType('ESS')">ESS</button>
+                <button onclick="switchType('WSS')">WSS</button>
             </div>
-            <div class="dashboard-tile tile-blue" onclick="checkAndGo('mes-terminal.html')">
-                <div class="tile-icon">💻</div><div class="tile-title">MES terminál</div><div class="tile-desc">Gyors belépés (QR)</div>
+            <div class="mb-3">
+                <label class="form-label small fw-bold">IC kiválasztása</label>
+                <select id="genSelect" class="form-select form-select-lg"></select>
             </div>
-            <div class="dashboard-tile tile-green" onclick="checkAndGo('pack-code.html')">
-                <div class="tile-icon">📦</div><div class="tile-title">Csomagoló kód</div><div class="tile-desc">Csomagoló azonosítók</div>
+            <div class="mb-4">
+                <label class="form-label small fw-bold">Mennyiség (Max 5000)</label>
+                <input type="number" id="genAmount" class="form-control form-control-lg" placeholder="Pl. 1500" inputmode="numeric" pattern="[0-9]*" min="1" max="5000">
             </div>
+            
+            <button class="btn btn-primary btn-lg w-100" onclick="generateData()">Generálás</button>
         </div>
-    </main>
+    </div>
 
-    <nav class="bottom-nav">
-        <button onclick="checkAndGo('admin.html')"><span class="nav-ico">🗂️</span>Admin</button>
-        <button onclick="checkAndGo('info.html')"><span class="nav-ico">ℹ️</span>Infó</button>
-    </nav>
+    <!-- ADMIN FÜL -->
+    <div id="tab-admin" class="hidden">
+        <div class="minimal-card">
+            <h5 class="fw-bold mb-3">IC Adatbázis</h5>
+            <div id="adminList" class="list-group list-group-flush"></div>
+            <button class="btn btn-outline-primary mt-4 w-100" style="border-style:dashed" onclick="openIcModal()">+ Új IC rögzítése</button>
+        </div>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="js/ui.js"></script>
-    <script type="module" src="js/auth.js"></script>
+    <!-- STATISZTIKA FÜL -->
+    <div id="tab-stat" class="hidden">
+        <div class="minimal-card">
+            <h5 class="fw-bold mb-4">📊 Műszerfal</h5>
+            
+            <!-- NAPI BLOKK -->
+            <div class="p-3 mb-4 rounded" style="background: var(--sur2); border: 1px solid var(--bord);">
+                <h6 class="text-primary mb-3 fw-bold d-flex align-items-center gap-2">
+                    <span style="font-size: 1.2rem;">⚡</span> Mai aktivitás
+                </h6>
+                <div class="row text-center mb-3">
+                    <div class="col-6 border-end" style="border-color: var(--bord) !important;">
+                        <div class="text-muted small mb-1">Generálások</div>
+                        <strong class="fs-3" id="statDayCount">0</strong>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small mb-1">Készült darab</div>
+                        <strong class="fs-3" id="statDayAmount">0</strong>
+                    </div>
+                </div>
+                <div class="p-2 rounded text-center" style="background: var(--sur); border: 1px dashed var(--bord);">
+                    <div class="text-muted small mb-1">Mai kedvenc IC:</div>
+                    <strong id="statDayTop" class="text-primary" style="word-break: break-all; font-family: monospace; font-size: 1.1rem;">-</strong>
+                </div>
+            </div>
+
+            <!-- HAVI BLOKK -->
+            <div class="p-3 mb-4 rounded" style="background: var(--sur2); border: 1px solid var(--bord);">
+                <h6 class="text-primary mb-3 fw-bold d-flex align-items-center gap-2">
+                    <span style="font-size: 1.2rem;">📅</span> Ebben a hónapban
+                </h6>
+                <div class="row text-center mb-3">
+                    <div class="col-6 border-end" style="border-color: var(--bord) !important;">
+                        <div class="text-muted small mb-1">Generálások</div>
+                        <strong class="fs-3" id="statMonthCount">0</strong>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small mb-1">Összes darab</div>
+                        <strong class="fs-3" id="statMonthAmount">0</strong>
+                    </div>
+                </div>
+                <div class="p-2 rounded text-center" style="background: var(--sur); border: 1px dashed var(--bord);">
+                    <div class="text-muted small mb-1">Havi kedvenc IC:</div>
+                    <strong id="statMonthTop" class="text-primary" style="word-break: break-all; font-family: monospace; font-size: 1.1rem;">-</strong>
+                </div>
+            </div>
+
+            <!-- ÖSSZESÍTETT BLOKK -->
+            <div class="p-3 rounded" style="background: var(--sur2); border: 1px solid var(--bord);">
+                <h6 class="text-primary mb-3 fw-bold d-flex align-items-center gap-2">
+                    <span style="font-size: 1.2rem;">🌍</span> Teljes élettartam
+                </h6>
+                <div class="row text-center">
+                    <div class="col-6 border-end" style="border-color: var(--bord) !important;">
+                        <div class="text-muted small mb-1">Összes generálás</div>
+                        <strong class="fs-4" id="statAllCount">0</strong>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small mb-1">Felhasználók</div>
+                        <strong class="fs-4" id="statAllUsers">0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ÚJ: RÉSZLETES IC ALAPANYAG LISTA -->
+            <div class="p-3 mt-4 rounded" style="background: var(--sur2); border: 1px solid var(--bord);">
+                <h6 class="text-primary mb-3 fw-bold d-flex align-items-center gap-2">
+                    <span style="font-size: 1.2rem;">📦</span> Alapanyagok összesítője
+                </h6>
+                <div id="statIcBreakdown" class="d-flex flex-column gap-2" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                    <!-- Ide töltődik be a lista a JS-ből -->
+                    <div class="text-center text-muted small py-2">Adatok betöltése...</div>
+                </div>
+            </div>
+
+            <button class="btn btn-outline-primary w-100 mt-4" style="border-style:dashed" onclick="loadStats()">🔄 Adatok frissítése</button>
+        </div>
+    </div>
+
+    <!-- INFÓ FÜL -->
+    <div id="tab-info" class="hidden">
+        <div class="minimal-card">
+            <h5 class="fw-bold mb-4">📱 Telepítés (PWA)</h5>
+            <div class="info-block">
+                <strong>🍏 iPhone (Safari böngésző)</strong>
+                <ol style="margin-top:5px; margin-bottom:0; padding-left:20px; font-size:0.8rem; color:var(--tx2); line-height:1.5;">
+                  <li>Nyisd meg ezt a linket a <strong>Safari</strong> böngészőben.</li>
+                  <li>Koppints az alul középen lévő <strong>Megosztás</strong> (négyzetből felfelé mutató nyíl) ikonra.</li>
+                  <li>Görgess le, és válaszd a <strong>Főképernyőhöz adás</strong> opciót.</li>
+                  <li>A jobb felső sarokban koppints a <strong>Hozzáadás</strong> gombra.</li>
+                </ol>
+            </div>
+            <div class="info-block mt-3">
+                <strong>🤖 Android (Chrome böngésző)</strong>
+                <ol style="margin-top:5px; margin-bottom:0; padding-left:20px; font-size:0.8rem; color:var(--tx2); line-height:1.5;">
+                  <li>Nyisd meg ezt a linket a <strong>Chrome</strong> böngészőben.</li>
+                  <li>Koppints a jobb felső sarokban lévő <strong>Menü</strong> (három pötty) ikonra.</li>
+                  <li>Válaszd a <strong>Hozzáadás a kezdőképernyőhöz</strong> opciót.</li>
+                  <li>Koppints a <strong>Telepítés</strong> gombra.</li>
+                </ol>
+            </div>
+            <div class="info-block highlight mt-3 p-3 rounded" style="background: rgba(157, 41, 178, 0.05);">
+                <h6 class="text-primary mb-1">🔄 Hogyan frissül az app?</h6>
+                <p style="margin-top:5px; margin-bottom:0; font-size:0.8rem; color:var(--tx2); line-height:1.5;">A frissítéseket a háttérben tölti le. Ha új verzió jelenik meg, felugrik egy <strong>"Frissítés"</strong> gomb. Csak koppints rá!</p>
+            </div>
+            <div class="info-block mt-4">
+                <h6>📧 Kapcsolat</h6>
+                <a href="mailto:gabor.2.kovacs@aumovio.com" class="contact-link text-decoration-none fw-bold" style="color: #9d29b2;">gabor.2.kovacs@aumovio.com</a>
+            </div>
+            <div class="version-footer text-center mt-4 small text-muted">Készítette: Kovács Gábor · Verzió: 1.2.2</div>
+            <button class="btn btn-primary w-100 mt-3" onclick="showTab('generator')">Rendben</button>
+        </div>
+    </div>
+</main>
+
+<!-- ALSÓ MENÜ -->
+<nav class="bottom-nav">
+    <button class="active" onclick="showTab('generator')"><span class="nav-ico">⚡</span>Generátor</button>
+    <button onclick="showTab('admin')"><span class="nav-ico">🗂️</span>Admin</button>
+    <button onclick="showTab('stat')"><span class="nav-ico">📊</span>Stat</button>
+    <button onclick="showTab('info')"><span class="nav-ico">ℹ️</span>Infó</button>
+</nav>
+
+<div class="qr-fullscreen hidden" id="qrFullscreen">
+    <div class="qr-scroll-area">
+        <div class="qr-large-box">
+            <div id="q1-large"></div>
+            <div class="qr-label mt-3 fs-6" id="q1-text"></div>
+        </div>
+        <div class="qr-large-box">
+            <div id="q2-large"></div>
+            <div class="qr-label mt-3 fs-6" id="q2-text"></div>
+        </div>
+    </div>
+    <div class="qr-footer">
+        <button class="btn btn-primary w-100 btn-lg" onclick="closeQr()">Bezárás</button>
+    </div>
+</div>
+
+<div class="overlay" id="icModal">
+    <div class="modal-custom">
+        <h4 id="imTitle" class="fw-bold mb-4">IC Kezelés</h4>
+        <div class="mb-3"><label class="form-label">Terület</label><select id="imType" class="form-select"><option value="ESS">ESS</option><option value="WSS">WSS</option></select></div>
+        <div class="mb-4"><label class="form-label">IC Száma</label><input type="text" id="imCode" class="form-control" style="text-transform: uppercase;"></div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-danger" id="imDel" onclick="deleteIc()" style="display:none">Törlés</button>
+            <button class="btn btn-light flex-grow-1" onclick="closeModal('icModal')">Mégsem</button>
+            <button class="btn btn-primary flex-grow-1" onclick="saveIc()">Mentés</button>
+        </div>
+    </div>
+</div>
+
+<!-- ÚJ OLDALSÓ PROFIL MENÜ -->
+<div class="side-overlay" id="sideOverlay" onclick="closeSideMenu()"></div>
+<div class="side-menu" id="sideMenu">
+    <h5 class="fw-bold mb-4 text-primary d-flex align-items-center gap-2">
+        <span style="font-size: 1.5rem;">👤</span> Profil adatok
+    </h5>
+    
+    <div class="info-block highlight mb-4">
+        <p style="font-size: 0.8rem; line-height: 1.4;">A generátor használatához kérlek add meg a nevedet. Ezt csak egyszer kell beállítanod az eszközödön.</p>
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label small fw-bold">Név *</label>
+        <input type="text" id="profileName" class="form-control" placeholder="Pl. Kiss János">
+    </div>
+    
+    <div class="mt-auto pb-4">
+        <button class="btn btn-primary w-100 btn-lg" onclick="saveProfile()">Adatok Mentése</button>
+    </div>
+</div>
+<!-- PROFIL MENÜ VÉGE -->
+
+
+<div class="toast-container"><div id="liveToast" class="toast align-items-center text-white bg-dark border-0" role="alert"><div class="d-flex"><div class="toast-body" id="toastMsg"></div></div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="app.js"></script>
 </body>
 </html>

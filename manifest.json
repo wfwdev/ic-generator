@@ -1,12 +1,10 @@
 {
-  "name": "IC Generator",
+  "name": "AddIC Generator",
   "short_name": "IC Gen",
-  "start_url": "./",
+  "start_url": "index.html",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#f8fafc",
+  "background_color": "#f0f3f8",
   "theme_color": "#ff5f00",
-  "lang": "hu",
   "icons": [
     {
       "src": "icon-192.png",
