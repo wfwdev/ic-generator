@@ -288,3 +288,39 @@ body.dark-mode .navbar-title {
     transition: all 0.3s ease; 
 }
 .side-overlay.open { opacity: 1; visibility: visible; }
+
+/* === ÚJ QUBE VERZIÓ PULZÁLÓ GOMB ÉS KÁRTYA === */
+@keyframes pulse-orange {
+    0% { box-shadow: 0 0 0 0 rgba(255, 95, 0, 0.7); }
+    70% { box-shadow: 0 0 0 12px rgba(255, 95, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 95, 0, 0); }
+}
+
+.qube-alert-card {
+    background: linear-gradient(135deg, #2b2b2b, #1a1a1a);
+    border: 1px solid #ff5f00;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-pulse-qube {
+    animation: pulse-orange 2s infinite;
+    background: linear-gradient(45deg, #ff5f00, #ff8c00);
+    color: #fff !important;
+    font-weight: 700;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform 0.2s;
+}
+
+.btn-pulse-qube:active {
+    transform: scale(0.95);
+}
